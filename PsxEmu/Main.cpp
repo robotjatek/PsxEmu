@@ -29,6 +29,9 @@ a pipelinet lehet hogy emulálni kéne
 
 //TODO: a decodeban az indirekt függvényhívásokat switch-re cserélni
 
+//XXX: Threads of Fate c. jatek division by zero "famous emulation error"
+//XXX: formula one 2001 r3000 do not update the I-cache on write to main memory
+
 int main()
 {
 	Memory memory;

@@ -23,7 +23,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 {
 	delay_slot = false;
 	//TODO: execute decoded instruction
-	uint8_t opcode = (instruction_word & 0xFC000000)>>26;
+	uint8_t opcode = (instruction_word & 0xFC000000) >> 26;
 	if (opcode == 0) //opcode = 0
 	{
 		//rtype instruction
@@ -137,7 +137,7 @@ inline void R3000A::Add(uint8_t rd, uint8_t rs, uint8_t rt)
 	uint32_t _rs = read_register(rs);
 	uint32_t _rt = read_register(rt);
 	uint32_t temp = _rs + _rt;
-	
+
 	if ((~(_rs ^ _rt))&(_rs ^ temp) & 0x80000000)
 	{
 		m_cop0->setException(pc, Cop0::ExceptionCodes::Ovf, this->in_branch);
@@ -202,7 +202,7 @@ inline void R3000A::Beq(uint8_t rt, uint8_t rs, uint16_t imm)
 		delay_slot_address = pc + offset;
 		delay_slot = true;
 	}
-	
+
 }
 
 inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
@@ -293,6 +293,23 @@ inline void R3000A::Copz(uint32_t cop_fun)
 {
 }
 
+inline void R3000A::Div(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	int32_t _rs = read_register(rs);
+	int32_t _rt = read_register(rt);
+	if (_rt > 0)
+	{
+		lo = _rs / _rt;
+		hi = _rs % _rt;
+	}
+	else
+	{
+		lo = 0;
+		hi = 0;
+		//TODO: check if this is correct
+	}
+}
+
 inline void R3000A::Lb(uint8_t base, uint8_t rt, uint16_t offset)
 {
 	//TODO: address error exception? 
@@ -327,6 +344,7 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	rtypes[0x21] = &R3000A::Addu;
 	rtypes[0x24] = &R3000A::And;
 	rtypes[0xd] = &R3000A::Break;
+	rtypes[0x1A] = &R3000A::Div;
 
 	itypes[0x8] = &R3000A::Addi;
 	itypes[0x9] = &R3000A::Addiu;

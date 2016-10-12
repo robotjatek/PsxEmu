@@ -93,6 +93,7 @@ public:
 	inline void Bne(uint8_t rt, uint8_t rs, uint16_t imm);
 	inline void Break(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Copz(uint32_t cop_fun); //implemented in the decode function
+	inline void Div(uint8_t rd, uint8_t rs, uint8_t rt);
 
 	inline void Lb(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Lbu(uint8_t base, uint8_t rt, uint16_t offset);
