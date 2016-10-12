@@ -75,6 +75,11 @@ public:
 	typedef void (R3000A::*JTypeInstructionPtr)(uint32_t target);
 	JTypeInstructionPtr jtypes[0x3F]; 
 
+	inline void RtypeNull(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void ItypeNull(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void JtypeNull(uint32_t target);
+	inline void Null();
+
 	inline void CallRegimmFunc(uint8_t rt, uint8_t rs, uint16_t imm);
 
 	inline void Add(uint8_t rd, uint8_t rs, uint8_t rt);

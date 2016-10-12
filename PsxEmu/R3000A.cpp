@@ -110,6 +110,26 @@ inline JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
 	return ret;
 }
 
+inline void R3000A::RtypeNull(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	Null();
+}
+
+inline void R3000A::ItypeNull(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	Null();
+}
+
+inline void R3000A::JtypeNull(uint32_t target)
+{
+	Null();
+}
+
+inline void R3000A::Null()
+{
+	std::cout << "unrecognized opcode: " << this->pc - 4 << std::endl;
+}
+
 inline void R3000A::CallRegimmFunc(uint8_t rt, uint8_t rs, uint16_t imm)
 {
 	switch (rt)
@@ -383,6 +403,13 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	m_copx[3] = nullptr;
 
 	m_cop0 = dynamic_cast<Cop0*>(m_copx[0]);
+
+	for (int i = 0; i < 0x3F; i++)
+	{
+		rtypes[i] = &R3000A::RtypeNull;
+		itypes[i] = &R3000A::ItypeNull;
+		jtypes[i] = &R3000A::JtypeNull;
+	}
 
 	rtypes[0x20] = &R3000A::Add;
 	rtypes[0x21] = &R3000A::Addu;
