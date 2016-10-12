@@ -22,7 +22,7 @@ Memory::~Memory()
 
 
 //TODO: egyszerûbb lenne a felsõ 3 bitet nullázni egy logikai éssel
-//XXX: status regiszterben a BEV (boot exception vector) 1 és 0 eseteknek utánanézni/tesztelni
+//TODO: status regiszterben a BEV (boot exception vector) 1 és 0 eseteknek utánanézni/tesztelni
 uint8_t Memory::read(uint32_t address)
 {
 	//handle mirroring
@@ -42,7 +42,7 @@ uint8_t Memory::read(uint32_t address)
 	return m_rawData[address];
 }
 
-//scratchpad?
+//TODO: scratchpad?
 
 void Memory::write(uint32_t address, uint8_t data)
 {

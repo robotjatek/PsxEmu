@@ -94,7 +94,11 @@ public:
 	inline void Break(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Copz(uint32_t cop_fun); //implemented in the decode function
 	inline void Div(uint8_t rd, uint8_t rs, uint8_t rt);
-
+	inline void Divu(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void J(uint32_t target);
+	inline void Jal(uint32_t target);
+	inline void Jalr(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Jr(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Lb(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Lbu(uint8_t base, uint8_t rt, uint16_t offset);
 public:

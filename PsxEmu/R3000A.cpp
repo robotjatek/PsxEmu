@@ -307,7 +307,51 @@ inline void R3000A::Div(uint8_t rd, uint8_t rs, uint8_t rt)
 		lo = 0;
 		hi = 0;
 		//TODO: check if this is correct
+		//XXX: number/0 = +inf && 0/0=NaN (????)
+		//XXX: from the docs: if the divisior in rt is zero, the aritmetic result is undefined
 	}
+}
+
+inline void R3000A::Divu(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	uint32_t _rs = read_register(rs);
+	uint32_t _rt = read_register(rt);
+	if (_rt)
+	{
+		lo = _rs / _rt;
+		hi = _rs % _rt;
+	}
+	else
+	{
+		lo = 0;
+		hi = 0;
+	}
+
+}
+
+inline void R3000A::J(uint32_t target)
+{
+	//pc is slready on the next instruction
+	pc = (pc & 0xf0000000) | (target << 2);
+}
+
+inline void R3000A::Jal(uint32_t target)
+{
+	write_register(31, pc + 4);
+	pc = (pc & 0xf0000000) | (target << 2);
+}
+
+inline void R3000A::Jalr(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, pc + 4);
+	pc = read_register(rs);
+	//TODO: The effective target address in GPR rs must be naturally aligned. If either of the two	least - significant bits are not - zero, then an Address Error exception occurs, not for the jump instruction, but when the branch target is subsequently fetched as an instruction.
+}
+
+inline void R3000A::Jr(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	pc = read_register(rs);
+	//TODO: The effective target address in GPR rs must be naturally aligned. If either of the two	least - significant bits are not - zero, then an Address Error exception occurs, not for the jump instruction, but when the branch target is subsequently fetched as an instruction.
 }
 
 inline void R3000A::Lb(uint8_t base, uint8_t rt, uint16_t offset)
@@ -345,6 +389,9 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	rtypes[0x24] = &R3000A::And;
 	rtypes[0xd] = &R3000A::Break;
 	rtypes[0x1A] = &R3000A::Div;
+	rtypes[0x1B] = &R3000A::Divu;
+	rtypes[0x9] = &R3000A::Jalr;
+	rtypes[0x8] = &R3000A::Jr;
 
 	itypes[0x8] = &R3000A::Addi;
 	itypes[0x9] = &R3000A::Addiu;
@@ -356,6 +403,9 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	itypes[0x5] = &R3000A::Bne;
 	itypes[0x20] = &R3000A::Lb;
 	itypes[0x24] = &R3000A::Lbu;
+
+	jtypes[0x2] = &R3000A::J;
+	jtypes[0x3] = &R3000A::Jal;
 }
 
 R3000A::~R3000A()

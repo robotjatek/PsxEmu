@@ -17,20 +17,23 @@ the instruction after a branch, a jump or a load is always executed! Even if the
  + a load után következõ utasítás még nem rendelkezik a load értékével!
  --------------------------------------------------
 
+ Threads of Fate c. jatek division by zero "famous emulation error"
+ formula one 2001 r3000 do not update the I-cache on write to main memory
 
 */
 
 
 /*
-a pipelinet lehet hogy emulálni kéne
+TODO: a pipelinet lehet hogy emulálni kéne
 */
 
 //TODO: sign extension - negatív offsettel tesztelni az elágazásokat
 
 //TODO: a decodeban az indirekt függvényhívásokat switch-re cserélni
 
-//XXX: Threads of Fate c. jatek division by zero "famous emulation error"
-//XXX: formula one 2001 r3000 do not update the I-cache on write to main memory
+//TODO: Threads of Fate c. jatek division by zero "famous emulation error"
+//TODO: formula one 2001 r3000 do not update the I-cache on write to main memory
+//TODO: By convention, if an exception or interrupt prevents the completion of an instruction in the branch delay slot, the instruction stream is continued by re - executing the branch instruction.
 
 int main()
 {
