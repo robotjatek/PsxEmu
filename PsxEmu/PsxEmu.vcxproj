@@ -110,7 +110,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cop0.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="R3000A.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cop0.h" />
+    <ClInclude Include="ICoprocessor.h" />
+    <ClInclude Include="Memory.h" />
+    <ClInclude Include="R3000A.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
