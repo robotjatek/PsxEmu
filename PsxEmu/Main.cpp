@@ -19,6 +19,8 @@ the instruction after a branch, a jump or a load is always executed! Even if the
 
  Threads of Fate c. jatek division by zero "famous emulation error"
  formula one 2001 r3000 do not update the I-cache on write to main memory
+ -----------------------------------------------------------------------------
+ scratcpad: egymásnak ellentmondó adatok: 1k vagy 4k méretek...
 
 */
 
