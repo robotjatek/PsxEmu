@@ -78,7 +78,7 @@ public:
 	inline void RtypeNull(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void ItypeNull(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void JtypeNull(uint32_t target);
-	inline void Null();
+	inline void Null(uint8_t op, uint8_t funct);
 
 	inline void CallRegimmFunc(uint8_t rt, uint8_t rs, uint16_t imm);
 

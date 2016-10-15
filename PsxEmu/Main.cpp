@@ -44,7 +44,7 @@ int main()
 	Memory memory;
 	memory.load_binary_to_bios_area("asd.txt");
 	R3000A r3000(memory);
-	r3000.Step();
+	r3000.Run();
 	system("pause");
 	return 0;
 }

@@ -45,7 +45,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		ITypeInstruction i = getITypeFields(instruction_word);
 		(this->*itypes[i.op])(i.rt, i.rs, i.immediate);
 	}
-	std::cout << registers[2];
+	//std::cout << registers[2];
 	//handle delay slot after a branch, load or jump
 	if (delay_slot)
 	{
@@ -112,22 +112,26 @@ inline JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
 
 inline void R3000A::RtypeNull(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	Null();
+	RTypeInstruction r = getRTypeFields(m_memory.read_word(pc - 4));
+	Null(r.op, r.funct);
 }
 
 inline void R3000A::ItypeNull(uint8_t base, uint8_t rt, uint16_t offset)
 {
-	Null();
+	ITypeInstruction i = getITypeFields(m_memory.read_word(pc - 4));
+	Null(i.op, 0);
 }
 
 inline void R3000A::JtypeNull(uint32_t target)
 {
-	Null();
+	JTypeInstruction j = getJTypeFields(m_memory.read_word(pc - 4));
+	Null(j.op,0);
 }
 
-inline void R3000A::Null()
+inline void R3000A::Null(uint8_t op, uint8_t funct)
 {
-	std::cout << "unrecognized opcode: " << this->pc - 4 << std::endl;
+	std::cout << "unrecognized opcode: " << (int)op <<"funct: "<<(int)funct<< std::endl;
+	this->is_running = false;
 }
 
 inline void R3000A::CallRegimmFunc(uint8_t rt, uint8_t rs, uint16_t imm)
@@ -445,6 +449,7 @@ R3000A::~R3000A()
 
 void R3000A::Run()
 {
+	is_running = true;
 	while (is_running)
 	{
 		Step();

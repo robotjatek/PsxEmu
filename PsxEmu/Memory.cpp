@@ -1,7 +1,7 @@
 #include "Memory.h"
 #include <fstream>
 
-/* Fact: the PSX has a 4 kB I-cache. If the instruction is in the I-cache, it takes just 1 clock cycle to execute. 
+/* Fact: the PSX has a 4 kB I-cache. If the instruction is in the I-cache, it takes just 1 clock cycle to execute.
 The cache hit ratio is 95%, so most code run at full speed.*/
 
 
@@ -22,7 +22,7 @@ void Memory::set_memory_pointers(uint32_t vaddr)
 	}
 	else if (vaddr >= SCRATCH_PAD_START && vaddr <= SCRATCH_PAD_END)
 	{
-		m_byte_ptr  = &m_scratch_pad[vaddr - SCRATCH_PAD_START];
+		m_byte_ptr = &m_scratch_pad[vaddr - SCRATCH_PAD_START];
 	}
 	else if (vaddr >= PARALLEL_PORT_START && vaddr <= PARALLEL_PORT_END)
 	{
@@ -107,7 +107,7 @@ uint16_t Memory::read_halfword(uint32_t address)
 		return 0;
 	}
 #else
-	return read(address) << 8 | read(address+1); //for systems with big endian compiler
+	return read(address) << 8 | read(address + 1); //for systems with big endian compiler
 #endif
 }
 
@@ -124,7 +124,7 @@ uint32_t Memory::read_word(uint32_t address)
 		return 0;
 	}
 #else
-	return read(address) << 24 | read(address + 1) << 16 | read(address + 2) << 8 | read(address+3); //for systems with big endian compiler
+	return read(address) << 24 | read(address + 1) << 16 | read(address + 2) << 8 | read(address + 3); //for systems with big endian compiler
 #endif
 }
 
@@ -166,8 +166,8 @@ void Memory::write_halfword(uint32_t address, uint16_t data)
 #else
 	uint8_t v1 = data >> 8;
 	uint8_t v2 = data & 0xff;
-	write(v1);
-	write(v2);
+	write(address, v1);
+	write(address + 2, v2);
 #endif
 }
 
@@ -184,10 +184,10 @@ void Memory::write_word(uint32_t address, uint32_t data)
 	uint8_t v2 = (data >> 16) & 0xff;
 	uint8_t v3 = (data >> 8) & 0xff;
 	uint8_t v4 = data & 0xff;
-	write(v1);
-	write(v2);
-	write(v3);
-	write(v4);
+	write(address, v1);
+	write(address + 1, v2);
+	write(address + 2, v3);
+	write(address + 3, v4);
 #endif
 }
 
@@ -197,7 +197,7 @@ void Memory::load_binary_to_bios_area(std::string filename)
 	if (file.is_open())
 	{
 		std::streamoff size = file.tellg();
-		file.seekg(0,file.beg);
+		file.seekg(0, file.beg);
 		file.read((char*)&(this->bios_area[0]), size);
 		file.close();
 	}
