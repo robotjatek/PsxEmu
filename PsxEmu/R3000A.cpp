@@ -9,14 +9,16 @@ void R3000A::Step()
 inline uint32_t R3000A::Fetch()
 {
 	//Data stored as little endian, so for easy decoding it is better to reverse byte order
-	uint32_t t1, t2, t3, t4;
+	/*uint32_t t1, t2, t3, t4;
 	t1 = m_memory.read(pc);
 	t2 = m_memory.read(pc + 1);
 	t3 = m_memory.read(pc + 2);
 	t4 = m_memory.read(pc + 3);
 	pc += 4;
 
-	return ((t4 << 24) | (t3 << 16) | (t2 << 8) | t1);
+	return ((t4 << 24) | (t3 << 16) | (t2 << 8) | t1);*/
+
+	return m_memory.read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
 }
 
 inline void R3000A::Decode(uint32_t instruction_word)
@@ -35,17 +37,28 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		JTypeInstruction j = getJTypeFields(instruction_word);
 		(this->*jtypes[j.op])(j.target);
 	}
-	else if (uint8_t copnum = (opcode & 0x3) == 10)
+	else if ((opcode & ~0x3) == 10)
 	{
+		uint8_t copnum = opcode & 0x3;
 		JTypeInstruction j = getJTypeFields(instruction_word);
 		m_copx[copnum]->Operation(j.target);
+	}
+	else if ((opcode & ~0x3) == 0x30)
+	{
+		uint8_t copnum = opcode & 0x3;
+		ITypeInstruction i = getITypeFields(instruction_word);
+		int16_t offset = i.immediate;
+		uint32_t w = m_memory.read_word(read_register(i.rs) + offset);
+		//TODO: check if i need to write to rt
+		write_register(i.rt, w);
+		m_copx[copnum]->LoadWord(w);
 	}
 	else
 	{
 		ITypeInstruction i = getITypeFields(instruction_word);
 		(this->*itypes[i.op])(i.rt, i.rs, i.immediate);
 	}
-	//std::cout << registers[2];
+	std::cout << registers[2];
 	//handle delay slot after a branch, load or jump
 	if (delay_slot)
 	{
@@ -382,14 +395,85 @@ inline void R3000A::Lb(uint8_t base, uint8_t rt, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read(registers[base] + signed_offset));
+	write_register(rt, m_memory.read(read_register(base) + signed_offset));
 }
 
 inline void R3000A::Lbu(uint8_t base, uint8_t rt, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read(registers[base] + signed_offset));
+	write_register(rt, m_memory.read(read_register(base) + signed_offset));
+}
+
+inline void R3000A::Lh(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	//TODO: address error exception? 
+	int16_t signed_offset = offset;
+	write_register(rt, m_memory.read_halfword(read_register(base) + signed_offset));
+}
+
+inline void R3000A::Lhu(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	//TODO: address error exception? 
+	int16_t signed_offset = offset;
+	write_register(rt, m_memory.read_halfword(read_register(base) + signed_offset));
+}
+
+inline void R3000A::Lui(uint8_t rt, uint8_t rs, uint16_t imm)
+{
+	int32_t t = ((int32_t)imm) << 16;
+	write_register(rt, t);
+}
+
+inline void R3000A::Lw(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	//TODO: address error exception? 
+	int16_t signed_offset = offset;
+	write_register(rt, m_memory.read_word(read_register(base) + signed_offset));
+}
+
+inline void R3000A::Lwcz(uint8_t base, uint8_t rt, uint16_t offset)
+{
+}
+
+inline void R3000A::Lwl(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	int16_t signed_offset = offset;
+	uint32_t w = read_register(rt);
+	uint32_t t = m_memory.read_halfword(read_register(base) + signed_offset);
+	w &= 0xFFFF0000;
+	w |= t << 16;
+	write_register(rt, w);
+}
+
+inline void R3000A::Lwr(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	int16_t signed_offset = offset;
+	uint32_t w = read_register(rt);
+	uint32_t t = m_memory.read_halfword(read_register(base) + signed_offset);
+	w &= 0x0000FFFF;
+	w |= t;
+	write_register(rt, w);
+}
+
+inline void R3000A::Mfhi(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, hi);
+}
+
+inline void R3000A::Mflo(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, lo);
+}
+
+inline void R3000A::Mthi(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	hi = read_register(rs);
+}
+
+inline void R3000A::Mtlo(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	lo = read_register(rs);
 }
 
 R3000A::R3000A(Memory & mem) : m_memory(mem)
@@ -418,25 +502,35 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	rtypes[0x20] = &R3000A::Add;
 	rtypes[0x21] = &R3000A::Addu;
 	rtypes[0x24] = &R3000A::And;
-	rtypes[0xd] = &R3000A::Break;
-	rtypes[0x1A] = &R3000A::Div;
-	rtypes[0x1B] = &R3000A::Divu;
-	rtypes[0x9] = &R3000A::Jalr;
-	rtypes[0x8] = &R3000A::Jr;
+	rtypes[0x0d] = &R3000A::Break;
+	rtypes[0x1a] = &R3000A::Div;
+	rtypes[0x1b] = &R3000A::Divu;
+	rtypes[0x09] = &R3000A::Jalr;
+	rtypes[0x08] = &R3000A::Jr;
+	rtypes[0x10] = &R3000A::Mfhi;
+	rtypes[0x12] = &R3000A::Mflo;
+	rtypes[0x11] = &R3000A::Mthi;
+	rtypes[0x13] = &R3000A::Mtlo;
 
-	itypes[0x8] = &R3000A::Addi;
-	itypes[0x9] = &R3000A::Addiu;
-	itypes[0xC] = &R3000A::Andi;
-	itypes[0x4] = &R3000A::Beq;
-	itypes[0x1] = &R3000A::CallRegimmFunc; //regimm type functions with opcode 0b000001
-	itypes[0x7] = &R3000A::Bgtz;
-	itypes[0x6] = &R3000A::Blez;
-	itypes[0x5] = &R3000A::Bne;
+	itypes[0x08] = &R3000A::Addi;
+	itypes[0x09] = &R3000A::Addiu;
+	itypes[0x0c] = &R3000A::Andi;
+	itypes[0x04] = &R3000A::Beq;
+	itypes[0x01] = &R3000A::CallRegimmFunc; //regimm type functions with opcode 0b000001
+	itypes[0x07] = &R3000A::Bgtz;
+	itypes[0x06] = &R3000A::Blez;
+	itypes[0x05] = &R3000A::Bne;
 	itypes[0x20] = &R3000A::Lb;
 	itypes[0x24] = &R3000A::Lbu;
+	itypes[0x21] = &R3000A::Lh;
+	itypes[0x25] = &R3000A::Lhu;
+	itypes[0x0f] = &R3000A::Lui;
+	itypes[0x23] = &R3000A::Lw;
+	itypes[0x22] = &R3000A::Lwl;
+	itypes[0x26] = &R3000A::Lwr;
 
-	jtypes[0x2] = &R3000A::J;
-	jtypes[0x3] = &R3000A::Jal;
+	jtypes[0x02] = &R3000A::J;
+	jtypes[0x03] = &R3000A::Jal;
 }
 
 R3000A::~R3000A()
@@ -450,7 +544,7 @@ R3000A::~R3000A()
 void R3000A::Run()
 {
 	is_running = true;
-	while (is_running)
+//	while (is_running)
 	{
 		Step();
 	}

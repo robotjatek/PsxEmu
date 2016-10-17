@@ -79,4 +79,5 @@ public:
 	void pushKernelBitAndInterruptBit(bool user_mode, bool interrupt_enable);
 	void pushInterruptBit(bool interrupt_enable);
 	virtual void Operation(uint32_t cop_fun);
+	virtual void LoadWord(uint32_t w);
 };

@@ -22,10 +22,12 @@ the instruction after a branch, a jump or a load is always executed! Even if the
  -----------------------------------------------------------------------------
  scratcpad: egymásnak ellentmondó adatok: 1k vagy 4k méretek...
 
+ -----------------------------------------------------------------------------------------------------
+ van külön a bios a BIOS_START címen, és van a kernel memory space a 0x0 fizikai címtõl
+
 */
 
 
-//TODO: van külön a bios a BIOS_START címen, és van a kernel memory space a 0x0 fizikai címtõl
 
 /*
 TODO: a pipelinet lehet hogy emulálni kéne

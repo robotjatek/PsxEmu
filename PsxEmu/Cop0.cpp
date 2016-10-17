@@ -70,3 +70,8 @@ void Cop0::Operation(uint32_t cop_fun)
 {
 	//TODO: implement cop0 operation
 }
+
+void Cop0::LoadWord(uint32_t w)
+{
+//TODO: implement cop0 loadword
+}

@@ -106,6 +106,18 @@ public:
 	inline void Jr(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Lb(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Lbu(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lh(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lhu(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lui(uint8_t rt, uint8_t rs, uint16_t imm);
+	inline void Lw(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lwcz(uint8_t base, uint8_t rt, uint16_t offset); //implemented in decode function
+	inline void Lwl(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lwr(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Mfhi(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Mflo(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Mthi(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Mtlo(uint8_t rd, uint8_t rs, uint8_t rt);
+
 public:
 	R3000A(Memory& mem);
 	~R3000A();
