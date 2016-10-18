@@ -476,6 +476,49 @@ inline void R3000A::Mtlo(uint8_t rd, uint8_t rs, uint8_t rt)
 	lo = read_register(rs);
 }
 
+inline void R3000A::Mult(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	int64_t result = read_register(rs) * read_register(rt);
+	lo = result & 0x00000000ffffffff;
+	hi = (result & 0xffffffff00000000) >> 32;
+}
+
+inline void R3000A::Multu(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	uint64_t result = read_register(rs) * read_register(rt);
+	lo = result & 0x00000000ffffffff;
+	hi = (result & 0xffffffff00000000) >> 32;
+}
+
+inline void R3000A::Nor(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, ~(read_register(rs) | read_register(rt)));
+}
+
+inline void R3000A::Or(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, read_register(rs) | read_register(rt));
+}
+
+inline void R3000A::Ori(uint8_t rt, uint8_t rs, uint16_t imm)
+{
+	write_register(rt, read_register(rs) | imm);
+}
+
+inline void R3000A::Sb(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	//todo: address error
+	int16_t signed_offset = offset;
+	m_memory.write(read_register(base) + signed_offset, read_register(rt));
+}
+
+inline void R3000A::Sh(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	//todo: address error
+	int16_t signed_offset = offset;
+	m_memory.write_halfword(read_register(base) + signed_offset, read_register(rt));
+}
+
 R3000A::R3000A(Memory & mem) : m_memory(mem)
 {
 	this->pc = BIOS_START; //reset vector - start of the BIOS: 0xbfc00000
@@ -511,6 +554,10 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	rtypes[0x12] = &R3000A::Mflo;
 	rtypes[0x11] = &R3000A::Mthi;
 	rtypes[0x13] = &R3000A::Mtlo;
+	rtypes[0x18] = &R3000A::Mult;
+	rtypes[0x19] = &R3000A::Mult;
+	rtypes[0x27] = &R3000A::Nor;
+	rtypes[0x25] = &R3000A::Or;
 
 	itypes[0x08] = &R3000A::Addi;
 	itypes[0x09] = &R3000A::Addiu;
@@ -528,6 +575,9 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	itypes[0x23] = &R3000A::Lw;
 	itypes[0x22] = &R3000A::Lwl;
 	itypes[0x26] = &R3000A::Lwr;
+	itypes[0x0d] = &R3000A::Ori;
+	itypes[0x28] = &R3000A::Sb;
+	itypes[0x29] = &R3000A::Sh;
 
 	jtypes[0x02] = &R3000A::J;
 	jtypes[0x03] = &R3000A::Jal;

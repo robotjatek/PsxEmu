@@ -117,6 +117,13 @@ public:
 	inline void Mflo(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Mthi(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Mtlo(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Mult(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Multu(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Nor(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Or(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Ori(uint8_t rt, uint8_t rs, uint16_t imm);
+	inline void Sb(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Sh(uint8_t base, uint8_t rt, uint16_t offset);
 
 public:
 	R3000A(Memory& mem);
