@@ -124,6 +124,25 @@ public:
 	inline void Ori(uint8_t rt, uint8_t rs, uint16_t imm);
 	inline void Sb(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Sh(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Sll(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Sllv(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Slt(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Slti(uint8_t rt, uint8_t rs, uint16_t imm);
+	inline void Sltiu(uint8_t rt, uint8_t rs, uint16_t imm);
+	inline void Sltu(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Sra(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Srav(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Srl(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Srlv(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Sub(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Subu(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Sw(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Swcz(uint8_t base, uint8_t rt, uint16_t offset); //implemented in decode function
+	inline void Swl(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Swr(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Syscall(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Xor(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Xori(uint8_t rt, uint8_t rs, uint16_t imm);
 
 public:
 	R3000A(Memory& mem);

@@ -24,7 +24,9 @@ the instruction after a branch, a jump or a load is always executed! Even if the
 
  -----------------------------------------------------------------------------------------------------
  van külön a bios a BIOS_START címen, és van a kernel memory space a 0x0 fizikai címtõl
-
+ -----------------------------------------------------------------------------------------------------
+ SIGN EXTENSION: ha az unsigned értéket elõtt egy ugyanolyan méretû signedra kasztolom, majd berakom egy nagyobb méretû tárolóba, akkor a sign extension automatikusan végbemegy
+ nagyobb méretû unsignedból kissebb méretû signedba átrakva is jó a sign
 */
 
 

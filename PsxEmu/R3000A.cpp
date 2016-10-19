@@ -30,7 +30,14 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	{
 		//rtype instruction
 		RTypeInstruction r = getRTypeFields(instruction_word);
-		(this->*rtypes[r.funct])(r.rd, r.rs, r.rt);
+		if (r.funct == 0 || r.funct == 1 || r.funct == 3)
+		{
+			(this->*rtypes[r.funct])(r.rd, r.sht, r.rt);
+		}
+		else
+		{
+			(this->*rtypes[r.funct])(r.rd, r.rs, r.rt);
+		}
 	}
 	else if (opcode == 2 || opcode == 3)
 	{
@@ -39,19 +46,27 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	}
 	else if ((opcode & ~0x3) == 10)
 	{
+		//COPz
 		uint8_t copnum = opcode & 0x3;
 		JTypeInstruction j = getJTypeFields(instruction_word);
 		m_copx[copnum]->Operation(j.target);
 	}
 	else if ((opcode & ~0x3) == 0x30)
 	{
+		//LWCz
 		uint8_t copnum = opcode & 0x3;
 		ITypeInstruction i = getITypeFields(instruction_word);
 		int16_t offset = i.immediate;
 		uint32_t w = m_memory.read_word(read_register(i.rs) + offset);
-		//TODO: check if i need to write to rt
-		write_register(i.rt, w);
-		m_copx[copnum]->LoadWord(w);
+		m_copx[copnum]->LoadWord(w, i.rt);
+	}
+	else if ((opcode & ~0x03) == 0x38)
+	{
+		//SWCz
+		uint8_t copnum = opcode & 0x3;
+		ITypeInstruction i = getITypeFields(instruction_word);
+		int16_t offset = i.immediate;
+		m_memory.write_word(read_register(i.rs) + offset, m_copx[copnum]->GetWord(i.rt));
 	}
 	else
 	{
@@ -138,12 +153,12 @@ inline void R3000A::ItypeNull(uint8_t base, uint8_t rt, uint16_t offset)
 inline void R3000A::JtypeNull(uint32_t target)
 {
 	JTypeInstruction j = getJTypeFields(m_memory.read_word(pc - 4));
-	Null(j.op,0);
+	Null(j.op, 0);
 }
 
 inline void R3000A::Null(uint8_t op, uint8_t funct)
 {
-	std::cout << "unrecognized opcode: " << (int)op <<"funct: "<<(int)funct<< std::endl;
+	std::cout << "unrecognized opcode: " << (int)op << "funct: " << (int)funct << std::endl;
 	this->is_running = false;
 }
 
@@ -519,6 +534,146 @@ inline void R3000A::Sh(uint8_t base, uint8_t rt, uint16_t offset)
 	m_memory.write_halfword(read_register(base) + signed_offset, read_register(rt));
 }
 
+inline void R3000A::Sll(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, read_register(rt) << rs);
+}
+
+inline void R3000A::Sllv(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, read_register(rt) << read_register(rs));
+}
+
+inline void R3000A::Slt(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	int32_t _rs = read_register(rs);
+	int32_t _rt = read_register(rt);
+	if (_rs < _rt)
+	{
+		write_register(rd, 1);
+	}
+	else
+	{
+		write_register(rd, 0);
+	}
+}
+
+inline void R3000A::Slti(uint8_t rt, uint8_t rs, uint16_t imm)
+{
+	int32_t _rs = (int32_t)read_register(rs);
+	int32_t _imm = (int16_t)imm;
+	write_register(rt, _rs < _imm ? 1 : 0);
+}
+
+inline void R3000A::Sltiu(uint8_t rt, uint8_t rs, uint16_t imm)
+{
+	write_register(rt, read_register(rs) < imm ? 1 : 0);
+}
+
+inline void R3000A::Sltu(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	uint32_t _rs = read_register(rs);
+	uint32_t _rt = read_register(rt);
+	if (_rs < _rt)
+	{
+		write_register(rd, 1);
+	}
+	else
+	{
+		write_register(rd, 0);
+	}
+}
+
+inline void R3000A::Sra(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, (int32_t)read_register(rt) >> rs);
+}
+
+inline void R3000A::Srav(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, (int32_t)read_register(rt) >> read_register(rs));
+}
+
+inline void R3000A::Srl(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, read_register(rt) >> rs);
+}
+
+inline void R3000A::Srlv(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, read_register(rt) >> read_register(rs));
+}
+
+inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	int32_t _rs = (int32_t)read_register(rs);
+	int32_t _rt = (int32_t)read_register(rt);
+	int32_t result = _rs - _rt;
+	if ((~(_rs ^ _rt))&(_rs ^ result) & 0x80000000)
+	{
+		m_cop0->setException(pc, Cop0::ExceptionCodes::Ovf, this->in_branch);
+		this->exception_pending = true;
+		std::cout << "overflow\n";
+	}
+	else
+	{
+		write_register(rd, result);
+	}
+}
+
+inline void R3000A::Subu(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	uint32_t _rs = (int32_t)read_register(rs);
+	uint32_t _rt = (int32_t)read_register(rt);
+	uint32_t result = _rs - _rt;
+	write_register(rd, result);
+}
+
+inline void R3000A::Sw(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	int16_t _offset = (int16_t)offset;
+	m_memory.write_word(read_register(base) + _offset, read_register(rt));
+	//todo:: address error
+}
+
+inline void R3000A::Swcz(uint8_t base, uint8_t rt, uint16_t offset)
+{
+}
+
+inline void R3000A::Swl(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	int16_t signed_offset = offset;
+	uint32_t w = read_register(rt);
+	w &= 0xFFFF0000;
+	w = w >> 16;
+	m_memory.write_halfword(read_register(base) + signed_offset, w);
+}
+
+inline void R3000A::Swr(uint8_t base, uint8_t rt, uint16_t offset)
+{
+	int16_t signed_offset = offset;
+	uint32_t w = read_register(rt);
+	w &= 0x0000FFFF;
+	m_memory.write_halfword(read_register(base) + signed_offset, w);
+}
+
+inline void R3000A::Syscall(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	m_cop0->setException(this->pc, Cop0::ExceptionCodes::Sys, this->in_branch);
+	this->exception_pending = true;
+	std::cout << "syscall\n";
+}
+
+inline void R3000A::Xor(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+	write_register(rd, read_register(rs) ^ read_register(rt));
+}
+
+inline void R3000A::Xori(uint8_t rt, uint8_t rs, uint16_t imm)
+{
+	write_register(rt, read_register(rs) ^ imm);
+}
+
 R3000A::R3000A(Memory & mem) : m_memory(mem)
 {
 	this->pc = BIOS_START; //reset vector - start of the BIOS: 0xbfc00000
@@ -558,6 +713,18 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	rtypes[0x19] = &R3000A::Mult;
 	rtypes[0x27] = &R3000A::Nor;
 	rtypes[0x25] = &R3000A::Or;
+	rtypes[0x00] = &R3000A::Sll;
+	rtypes[0x04] = &R3000A::Sllv;
+	rtypes[0x2a] = &R3000A::Slt;
+	rtypes[0x2b] = &R3000A::Sltu;
+	rtypes[0x03] = &R3000A::Sra;
+	rtypes[0x07] = &R3000A::Srav;
+	rtypes[0x02] = &R3000A::Srl;
+	rtypes[0x06] = &R3000A::Srlv;
+	rtypes[0x22] = &R3000A::Sub;
+	rtypes[0x23] = &R3000A::Subu;
+	rtypes[0x0c] = &R3000A::Syscall;
+	rtypes[0x26] = &R3000A::Xor;
 
 	itypes[0x08] = &R3000A::Addi;
 	itypes[0x09] = &R3000A::Addiu;
@@ -578,6 +745,12 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	itypes[0x0d] = &R3000A::Ori;
 	itypes[0x28] = &R3000A::Sb;
 	itypes[0x29] = &R3000A::Sh;
+	itypes[0x0a] = &R3000A::Slti;
+	itypes[0x0b] = &R3000A::Sltiu;
+	itypes[0x2b] = &R3000A::Sw;
+	itypes[0x2a] = &R3000A::Swl;
+	itypes[0x2e] = &R3000A::Swr;
+	itypes[0x0e] = &R3000A::Xori;
 
 	jtypes[0x02] = &R3000A::J;
 	jtypes[0x03] = &R3000A::Jal;
@@ -594,7 +767,7 @@ R3000A::~R3000A()
 void R3000A::Run()
 {
 	is_running = true;
-//	while (is_running)
+	//	while (is_running)
 	{
 		Step();
 	}
