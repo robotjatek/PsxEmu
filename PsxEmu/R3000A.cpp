@@ -247,7 +247,7 @@ inline void R3000A::Andi(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Beq(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int32_t)imm;
+	int32_t offset = (int16_t)imm;
 	offset *= 4;
 	if (read_register(rs) == read_register(rt))
 	{
@@ -259,7 +259,7 @@ inline void R3000A::Beq(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
 {
-	int32_t t_offset = (int32_t)offset;
+	int32_t t_offset = (int16_t)offset;
 	t_offset *= 4;
 	if (read_register(rs) >= 0)
 	{
@@ -270,7 +270,7 @@ inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
 
 inline void R3000A::Bgezal(uint8_t rt, uint8_t rs, uint16_t offset)
 {
-	int32_t t_offset = (int32_t)offset;
+	int32_t t_offset = (int16_t)offset;
 	t_offset *= 4;
 	write_register(31, pc + 4); //PC is already pointing to the next instruction, so here it should be increased by 4 and not 8 bytes, which is the second instruction after the branch (probably)
 	if (read_register(rs) >= 0)
@@ -282,7 +282,7 @@ inline void R3000A::Bgezal(uint8_t rt, uint8_t rs, uint16_t offset)
 
 inline void R3000A::Bgtz(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int32_t)imm;
+	int32_t offset = (int16_t)imm;
 	offset *= 4;
 	if (read_register(rs) > 0)
 	{
@@ -293,7 +293,7 @@ inline void R3000A::Bgtz(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Blez(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int32_t)imm;
+	int32_t offset = (int16_t)imm;
 	offset *= 4;
 	if (read_register(rs) <= 0)
 	{
@@ -304,7 +304,7 @@ inline void R3000A::Blez(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bltz(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int32_t)imm;
+	int32_t offset = (int16_t)imm;
 	offset *= 4;
 	if (read_register(rs) < 0)
 	{
@@ -315,7 +315,7 @@ inline void R3000A::Bltz(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bltzal(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t t_offset = (int32_t)imm;
+	int32_t t_offset = (int16_t)imm;
 	t_offset *= 4;
 	write_register(31, pc + 4); //PC is already pointing to the next instruction, so here it should be increased by 4 and not 8 bytes, which is the second instruction after the branch (probably)
 	if (read_register(rs) < 0)
@@ -327,7 +327,7 @@ inline void R3000A::Bltzal(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bne(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int32_t)imm;
+	int32_t offset = (int16_t)imm;
 	offset *= 4;
 	if (read_register(rs) != read_register(rt))
 	{
@@ -339,6 +339,7 @@ inline void R3000A::Bne(uint8_t rt, uint8_t rs, uint16_t imm)
 inline void R3000A::Break(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	this->m_cop0->setException(this->pc, Cop0::ExceptionCodes::Bp, this->in_branch);
+	this->exception_pending = true;
 }
 
 inline void R3000A::Copz(uint32_t cop_fun)
@@ -383,26 +384,30 @@ inline void R3000A::Divu(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::J(uint32_t target)
 {
-	//pc is slready on the next instruction
-	pc = (pc & 0xf0000000) | (target << 2);
+	//pc is already on the next instruction
+	delay_slot_address = (pc & 0xf0000000) | (target << 2);
+	delay_slot = true;
 }
 
 inline void R3000A::Jal(uint32_t target)
 {
 	write_register(31, pc + 4);
-	pc = (pc & 0xf0000000) | (target << 2);
+	delay_slot_address = (pc & 0xf0000000) | (target << 2);
+	delay_slot = true;
 }
 
 inline void R3000A::Jalr(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	write_register(rd, pc + 4);
-	pc = read_register(rs);
+	delay_slot_address = read_register(rs);
+	delay_slot = true;
 	//TODO: The effective target address in GPR rs must be naturally aligned. If either of the two	least - significant bits are not - zero, then an Address Error exception occurs, not for the jump instruction, but when the branch target is subsequently fetched as an instruction.
 }
 
 inline void R3000A::Jr(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	pc = read_register(rs);
+	delay_slot_address = read_register(rs);
+	delay_slot = true;
 	//TODO: The effective target address in GPR rs must be naturally aligned. If either of the two	least - significant bits are not - zero, then an Address Error exception occurs, not for the jump instruction, but when the branch target is subsequently fetched as an instruction.
 }
 
