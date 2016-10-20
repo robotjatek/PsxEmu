@@ -49,7 +49,14 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		//COPz
 		uint8_t copnum = opcode & 0x3;
 		JTypeInstruction j = getJTypeFields(instruction_word);
-		m_copx[copnum]->Operation(j.target&~(0x2000000));
+		if (j.target & 2000000)
+		{
+			m_copx[copnum]->Operation(j.target&~(0x2000000));
+		}
+		else
+		{
+
+		}
 	}
 	else if ((opcode & ~0x3) == 0x30)
 	{
