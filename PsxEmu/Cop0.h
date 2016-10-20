@@ -50,7 +50,7 @@ private:
 		Exception_PC			= 14, //exception handler - The 32-bit EPC register contains the virtual address of the instruction which took the exception, from which point processing resumes after the exception	has been serviced.When the virtual address of the instruction resides in a	branch delay slot, the EPC contains the virtual address of the instruction	immediately preceding the exception(that is, the EPC points to the Branch or Jump instruction).
 		Pr_id					= 15
 	};
-	uint32_t cop_registers[16];
+	uint32_t cop_registers[32];
 
 public:
 	enum ExceptionCodes
@@ -81,4 +81,8 @@ public:
 	virtual void Operation(uint32_t cop_fun);
 	virtual void LoadWord(uint32_t w, uint8_t rt);
 	virtual uint32_t GetWord(uint8_t rt);
+	virtual uint32_t MoveControlFromCoprocessor(uint8_t rd);
+	virtual void MoveControlToCoprocessor(uint8_t rd, uint32_t control);
+	virtual uint32_t MoveFromCoprocessor(uint8_t rd);
+	virtual void MoveToCoprocessor(uint8_t rd, uint32_t data);
 };

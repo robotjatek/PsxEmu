@@ -81,3 +81,24 @@ uint32_t Cop0::GetWord(uint8_t rt)
 	//todo: implement cop0 getword
 	return 0;
 }
+
+uint32_t Cop0::MoveControlFromCoprocessor(uint8_t rd)
+{
+	//unusuable on Cop0
+	return uint32_t();
+}
+
+void Cop0::MoveControlToCoprocessor(uint8_t rd, uint32_t control)
+{
+	//unusuable on Cop0
+}
+
+uint32_t Cop0::MoveFromCoprocessor(uint8_t rd)
+{
+	return cop_registers[rd];
+}
+
+void Cop0::MoveToCoprocessor(uint8_t rd, uint32_t data)
+{
+	cop_registers[rd] = data;
+}

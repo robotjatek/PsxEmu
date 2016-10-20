@@ -44,18 +44,36 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		JTypeInstruction j = getJTypeFields(instruction_word);
 		(this->*jtypes[j.op])(j.target);
 	}
-	else if ((opcode & ~0x3) == 10)
+	else if ((opcode & ~0x3) == 0x10)
 	{
 		//COPz
 		uint8_t copnum = opcode & 0x3;
 		JTypeInstruction j = getJTypeFields(instruction_word);
+		
 		if (j.target & 2000000)
 		{
 			m_copx[copnum]->Operation(j.target&~(0x2000000));
 		}
 		else
 		{
-
+			RTypeInstruction r = getRTypeFields(instruction_word);
+			
+			if (r.rs == 0)
+			{
+				write_register(r.rt, m_copx[copnum]->MoveFromCoprocessor(r.rd));
+			}
+			else if (r.rs == 0x04)
+			{
+				m_copx[copnum]->MoveToCoprocessor(r.rd, read_register(r.rt));
+			}
+			else if (r.rs == 0x02)
+			{
+				write_register(r.rt, m_copx[copnum]->MoveControlFromCoprocessor(r.rd));
+			}
+			else if (r.rs == 0x06)
+			{
+				m_copx[copnum]->MoveControlToCoprocessor(r.rd, read_register(r.rt));
+			}
 		}
 	}
 	else if ((opcode & ~0x3) == 0x30)
@@ -349,7 +367,15 @@ inline void R3000A::Break(uint8_t rd, uint8_t rs, uint8_t rt)
 	this->exception_pending = true;
 }
 
+inline void R3000A::Cfcz(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+}
+
 inline void R3000A::Copz(uint32_t cop_fun)
+{
+}
+
+inline void R3000A::Ctcz(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 }
 
@@ -483,6 +509,10 @@ inline void R3000A::Lwr(uint8_t base, uint8_t rt, uint16_t offset)
 	write_register(rt, w);
 }
 
+inline void R3000A::Mfcz(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+}
+
 inline void R3000A::Mfhi(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	write_register(rd, hi);
@@ -491,6 +521,10 @@ inline void R3000A::Mfhi(uint8_t rd, uint8_t rs, uint8_t rt)
 inline void R3000A::Mflo(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	write_register(rd, lo);
+}
+
+inline void R3000A::Mtcz(uint8_t rd, uint8_t rs, uint8_t rt)
+{
 }
 
 inline void R3000A::Mthi(uint8_t rd, uint8_t rs, uint8_t rt)

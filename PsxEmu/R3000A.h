@@ -97,7 +97,9 @@ public:
 	inline void Bltzal(uint8_t rt, uint8_t rs, uint16_t imm);
 	inline void Bne(uint8_t rt, uint8_t rs, uint16_t imm);
 	inline void Break(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Cfcz(uint8_t rd, uint8_t rs, uint8_t rt); //implemented in the decode function
 	inline void Copz(uint32_t cop_fun); //implemented in the decode function
+	inline void Ctcz(uint8_t rd, uint8_t rs, uint8_t rt); //implemented in the decode function
 	inline void Div(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Divu(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void J(uint32_t target);
@@ -113,8 +115,10 @@ public:
 	inline void Lwcz(uint8_t base, uint8_t rt, uint16_t offset); //implemented in decode function
 	inline void Lwl(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Lwr(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Mfcz(uint8_t rd, uint8_t rs, uint8_t rt); //implemented in decode function
 	inline void Mfhi(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Mflo(uint8_t rd, uint8_t rs, uint8_t rt);
+	inline void Mtcz(uint8_t rd, uint8_t rs, uint8_t rt); //implemented in decode function
 	inline void Mthi(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Mtlo(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Mult(uint8_t rd, uint8_t rs, uint8_t rt);
