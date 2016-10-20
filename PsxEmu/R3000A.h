@@ -34,7 +34,7 @@ struct ITypeInstruction
 struct JTypeInstruction
 {
 	uint8_t op : 6;
-	uint32_t target : 24;
+	uint32_t target : 26;
 };
 
 
