@@ -52,7 +52,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		
 		if (j.target & 2000000)
 		{
-			if (copnum == 0 && j.target&0x3f == 0x10) //rfe instruction
+			if (copnum == 0 && ((j.target&0x3f) == 0x10)) //rfe instruction
 			{
 				m_cop0->ReturnFromInterrupt();
 			}
@@ -835,7 +835,7 @@ R3000A::~R3000A()
 void R3000A::Run()
 {
 	is_running = true;
-	//	while (is_running)
+	while (is_running)
 	{
 		Step();
 	}

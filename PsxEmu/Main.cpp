@@ -46,7 +46,7 @@ TODO: a pipelinet lehet hogy emulálni kéne
 int main()
 {
 	Memory memory;
-	memory.load_binary_to_bios_area("asd.txt");
+	memory.load_binary_to_bios_area("SCPH1001.BIN");
 	R3000A r3000(memory);
 	r3000.Run();
 	system("pause");

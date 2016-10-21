@@ -13,7 +13,7 @@ Cop0::~Cop0()
 {
 }
 
-uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay, uint8_t coprocessor_error = 0, uint32_t badvaddr = 0)
+uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay, uint8_t coprocessor_error, uint32_t badvaddr)
 {
 	//todo: interrupt/exception mask
 	std::cout << "Exception occured" << std::endl;
@@ -61,7 +61,7 @@ void Cop0::setStatusRegister(uint32_t st)
 	this->cop_registers[RegisterNames::Status] = st;
 }
 
-void Cop0::pushKernelBitAndInterruptBit(bool user_mode = false, bool interrupt_enable = false)
+void Cop0::pushKernelBitAndInterruptBit(bool user_mode, bool interrupt_enable)
 {
 	uint8_t bits = this->cop_registers[RegisterNames::Status] & (StatusRegisterFields::KernelModeBits | StatusRegisterFields::InterruptBits);
 	bits <<= 2;
