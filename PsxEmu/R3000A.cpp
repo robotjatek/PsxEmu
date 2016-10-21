@@ -17,8 +17,9 @@ inline uint32_t R3000A::Fetch()
 	pc += 4;
 
 	return ((t4 << 24) | (t3 << 16) | (t2 << 8) | t1);*/
-
-	return m_memory.read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
+	uint32_t ret = m_memory.read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
+	pc += 4;
+	return ret;
 }
 
 inline void R3000A::Decode(uint32_t instruction_word)
@@ -109,7 +110,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		ITypeInstruction i = getITypeFields(instruction_word);
 		(this->*itypes[i.op])(i.rt, i.rs, i.immediate);
 	}
-	std::cout << registers[2];
+//	std::cout << registers[2];
 	//handle delay slot after a branch, load or jump
 	if (delay_slot)
 	{
