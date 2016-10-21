@@ -25,7 +25,7 @@ uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool bran
 	if (branch_delay)
 	{
 		cop_registers[RegisterNames::Cause] |= CauseRegisterFields::BranchDelay;
-		cop_registers[RegisterNames::Exception_PC] = pc - 4;
+		cop_registers[RegisterNames::Exception_PC] = pc - 8;
 	}
 	else
 	{

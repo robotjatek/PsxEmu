@@ -56,6 +56,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 			if (copnum == 0 && ((j.target&0x3f) == 0x10)) //rfe instruction
 			{
 				m_cop0->ReturnFromInterrupt();
+				exception_pending = false;
 			}
 			else
 			{
@@ -110,15 +111,16 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		ITypeInstruction i = getITypeFields(instruction_word);
 		(this->*itypes[i.op])(i.rt, i.rs, i.immediate);
 	}
-//	std::cout << registers[2];
+
 	//handle delay slot after a branch, load or jump
 	if (delay_slot)
 	{
 		Decode(Fetch());
-		if (delay_slot) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
+		if (!exception_pending) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
 		{
 			pc = delay_slot_address;
 		}
+	
 	}
 }
 
@@ -198,7 +200,7 @@ inline void R3000A::JtypeNull(uint32_t target)
 
 inline void R3000A::Null(uint8_t op, uint8_t funct)
 {
-	std::cout << "unrecognized opcode: " << (int)op << "funct: " << (int)funct << std::endl;
+	std::cout << "unrecognized opcode: " << (int)op << "funct: " << (int)funct << "pc: "<<std::hex<<pc<<std::endl;
 	this->is_running = false;
 }
 
@@ -836,9 +838,11 @@ R3000A::~R3000A()
 void R3000A::Run()
 {
 	is_running = true;
+	int i = 0;
 	while (is_running)
 	{
 		Step();
+		std::cout <<std::dec<< i++ << std::endl;
 	}
 }
 
