@@ -19,7 +19,7 @@ struct RTypeInstruction
 	uint8_t rt : 5; //target register
 	uint8_t rd : 5; //destination register
 	uint8_t sht : 5; //shift amount
-	uint8_t	funct : 5; //function field
+	uint8_t	funct : 6; //function field
 };
 
 //immediate type instruction
