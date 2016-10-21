@@ -52,7 +52,14 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		
 		if (j.target & 2000000)
 		{
-			m_copx[copnum]->Operation(j.target&~(0x2000000));
+			if (copnum == 0 && j.target&0x3f == 0x10) //rfe instruction
+			{
+				m_cop0->ReturnFromInterrupt();
+			}
+			else
+			{
+				m_copx[copnum]->Operation(j.target&~(0x2000000));
+			}
 		}
 		else
 		{
@@ -60,18 +67,22 @@ inline void R3000A::Decode(uint32_t instruction_word)
 			
 			if (r.rs == 0)
 			{
+				//mfcz
 				write_register(r.rt, m_copx[copnum]->MoveFromCoprocessor(r.rd));
 			}
 			else if (r.rs == 0x04)
 			{
+				//mtcz
 				m_copx[copnum]->MoveToCoprocessor(r.rd, read_register(r.rt));
 			}
 			else if (r.rs == 0x02)
 			{
+				//cfcz
 				write_register(r.rt, m_copx[copnum]->MoveControlFromCoprocessor(r.rd));
 			}
 			else if (r.rs == 0x06)
 			{
+				//ctcz
 				m_copx[copnum]->MoveControlToCoprocessor(r.rd, read_register(r.rt));
 			}
 		}
@@ -103,7 +114,10 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	if (delay_slot)
 	{
 		Decode(Fetch());
-		pc = delay_slot_address;
+		if (delay_slot) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
+		{
+			pc = delay_slot_address;
+		}
 	}
 }
 
@@ -217,8 +231,9 @@ inline void R3000A::Add(uint8_t rd, uint8_t rs, uint8_t rt)
 
 	if ((~(_rs ^ _rt))&(_rs ^ temp) & 0x80000000)
 	{
-		m_cop0->setException(pc, Cop0::ExceptionCodes::Ovf, this->in_branch);
+		pc = m_cop0->setException(pc - 4, Cop0::ExceptionCodes::Ovf, this->delay_slot);
 		this->exception_pending = true;
+		this->delay_slot = false;
 		std::cout << "overflow\n";
 	}
 	else
@@ -234,8 +249,9 @@ inline void R3000A::Addi(uint8_t rt, uint8_t rs, uint16_t imm)
 	uint32_t temp = _rs + _imm;
 	if ((~(_rs ^ _imm))&(_rs ^ temp) & 0x80000000)
 	{
-		m_cop0->setException(pc, Cop0::ExceptionCodes::Ovf, this->in_branch);
+		pc = m_cop0->setException(pc - 4, Cop0::ExceptionCodes::Ovf, this->delay_slot);
 		this->exception_pending = true;
+		this->delay_slot = false;
 	}
 	else
 	{
@@ -363,8 +379,9 @@ inline void R3000A::Bne(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Break(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	this->m_cop0->setException(this->pc, Cop0::ExceptionCodes::Bp, this->in_branch);
+	pc = this->m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Bp, this->delay_slot);
 	this->exception_pending = true;
+	this->delay_slot = false;
 }
 
 inline void R3000A::Cfcz(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -566,6 +583,10 @@ inline void R3000A::Ori(uint8_t rt, uint8_t rs, uint16_t imm)
 	write_register(rt, read_register(rs) | imm);
 }
 
+inline void R3000A::Rfe(uint8_t rd, uint8_t rs, uint8_t rt)
+{
+}
+
 inline void R3000A::Sb(uint8_t base, uint8_t rt, uint16_t offset)
 {
 	//todo: address error
@@ -657,8 +678,9 @@ inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
 	int32_t result = _rs - _rt;
 	if ((~(_rs ^ _rt))&(_rs ^ result) & 0x80000000)
 	{
-		m_cop0->setException(pc, Cop0::ExceptionCodes::Ovf, this->in_branch);
+		pc = m_cop0->setException(pc - 4, Cop0::ExceptionCodes::Ovf, this->delay_slot);
 		this->exception_pending = true;
+		this->delay_slot = false;
 		std::cout << "overflow\n";
 	}
 	else
@@ -705,8 +727,9 @@ inline void R3000A::Swr(uint8_t base, uint8_t rt, uint16_t offset)
 
 inline void R3000A::Syscall(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	m_cop0->setException(this->pc, Cop0::ExceptionCodes::Sys, this->in_branch);
+	pc = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Sys, this->delay_slot);
 	this->exception_pending = true;
+	this->delay_slot = false;
 	std::cout << "syscall\n";
 }
 
@@ -724,7 +747,6 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 {
 	this->pc = BIOS_START; //reset vector - start of the BIOS: 0xbfc00000
 	this->kernel_mode = false;
-	this->in_branch = false;
 	this->exception_pending = false;
 	this->delay_slot = false;
 	memset(registers, 0, sizeof(registers));

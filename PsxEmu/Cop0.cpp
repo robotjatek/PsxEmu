@@ -13,10 +13,37 @@ Cop0::~Cop0()
 {
 }
 
-void Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay)
+uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay, uint8_t coprocessor_error = 0, uint32_t badvaddr = 0)
 {
-	std::cout << "Exceptions are not implemented yet.";
-	throw 0;
+	//todo: interrupt/exception mask
+	std::cout << "Exception occured" << std::endl;
+	pushKernelBitAndInterruptBit();
+
+	cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::ExceptionCode;
+	cop_registers[RegisterNames::Cause] |= exceptioncode;
+
+	if (branch_delay)
+	{
+		cop_registers[RegisterNames::Cause] |= CauseRegisterFields::BranchDelay;
+		cop_registers[RegisterNames::Exception_PC] = pc - 4;
+	}
+	else
+	{
+		cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::BranchDelay;
+		cop_registers[RegisterNames::Exception_PC] = pc;
+	}
+
+	if (exceptioncode == ExceptionCodes::AdEL || exceptioncode == ExceptionCodes::AdES)
+	{
+		cop_registers[RegisterNames::Bad_Virtual_Address] = badvaddr;
+	}
+	else if (exceptioncode == ExceptionCodes::CpU)
+	{
+		cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::CoprocessorError;
+		cop_registers[RegisterNames::Cause] |= coprocessor_error;
+	}
+
+	return cop_registers[RegisterNames::Status] & StatusRegisterFields::BEV ? GENERAL_EXCEPTION_BEV_1_ADDRESS : GENERAL_EXCEPTION_BEV_0_ADDRESS;
 }
 
 void Cop0::enableStatusBits(uint32_t bits)
@@ -34,7 +61,7 @@ void Cop0::setStatusRegister(uint32_t st)
 	this->cop_registers[RegisterNames::Status] = st;
 }
 
-void Cop0::pushKernelBitAndInterruptBit(bool user_mode, bool interrupt_enable)
+void Cop0::pushKernelBitAndInterruptBit(bool user_mode = false, bool interrupt_enable = false)
 {
 	uint8_t bits = this->cop_registers[RegisterNames::Status] & (StatusRegisterFields::KernelModeBits | StatusRegisterFields::InterruptBits);
 	bits <<= 2;
@@ -50,6 +77,18 @@ void Cop0::pushKernelBitAndInterruptBit(bool user_mode, bool interrupt_enable)
 	}
 
 	this->cop_registers[RegisterNames::Status] &= ~(StatusRegisterFields::KernelModeBits | StatusRegisterFields::InterruptBits);
+	this->cop_registers[RegisterNames::Status] |= bits;
+}
+
+void Cop0::popKernelBitAndInterruptBit()
+{
+	uint8_t bits = this->cop_registers[RegisterNames::Status] & (StatusRegisterFields::KernelModeBits | StatusRegisterFields::InterruptBits);
+	uint8_t saved_KUo_IEo = bits & 0x30;
+	bits >>= 2;
+	bits |= saved_KUo_IEo;
+	bits &= 0x3F; //reset the two most significant bits as they are not needed
+
+	this->cop_registers[RegisterNames::Status] &= ~StatusRegisterFields::InterruptBits;
 	this->cop_registers[RegisterNames::Status] |= bits;
 }
 
@@ -73,7 +112,7 @@ void Cop0::Operation(uint32_t cop_fun)
 
 void Cop0::LoadWord(uint32_t w, uint8_t rt)
 {
-//TODO: implement cop0 loadword
+	//TODO: implement cop0 loadword
 }
 
 uint32_t Cop0::GetWord(uint8_t rt)
@@ -101,4 +140,9 @@ uint32_t Cop0::MoveFromCoprocessor(uint8_t rd)
 void Cop0::MoveToCoprocessor(uint8_t rd, uint32_t data)
 {
 	cop_registers[rd] = data;
+}
+
+void Cop0::ReturnFromInterrupt()
+{
+	popKernelBitAndInterruptBit();
 }

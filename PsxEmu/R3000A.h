@@ -52,7 +52,6 @@ public:
 	uint32_t lo;
 	uint32_t pc;
 	bool kernel_mode;
-	bool in_branch;
 	bool exception_pending;
 	bool delay_slot;
 	uint32_t delay_slot_address;
@@ -126,6 +125,7 @@ public:
 	inline void Nor(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Or(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Ori(uint8_t rt, uint8_t rs, uint16_t imm);
+	inline void Rfe(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Sb(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Sh(uint8_t base, uint8_t rt, uint16_t offset);
 	inline void Sll(uint8_t rd, uint8_t rs, uint8_t rt);

@@ -2,6 +2,9 @@
 #include <cstdint>
 #include "ICoprocessor.h"
 
+#define GENERAL_EXCEPTION_BEV_0_ADDRESS 0x80000080
+#define GENERAL_EXCEPTION_BEV_1_ADDRESS 0xbfc00180
+
 class Cop0 : public ICoprocessor
 {
 private:
@@ -52,6 +55,10 @@ private:
 	};
 	uint32_t cop_registers[32];
 
+	void pushKernelBitAndInterruptBit(bool user_mode, bool interrupt_enable);
+	void popKernelBitAndInterruptBit();
+	void pushInterruptBit(bool interrupt_enable);
+
 public:
 	enum ExceptionCodes
 	{
@@ -72,12 +79,10 @@ public:
 
 	Cop0();
 	virtual ~Cop0();
-	void setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay);
 	void enableStatusBits(uint32_t bits);
 	void disableStatusBits(uint32_t bits);
 	void setStatusRegister(uint32_t st);
-	void pushKernelBitAndInterruptBit(bool user_mode, bool interrupt_enable);
-	void pushInterruptBit(bool interrupt_enable);
+	uint32_t setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay, uint8_t coprocessor_error = 0, uint32_t badvaddr = 0);
 	virtual void Operation(uint32_t cop_fun);
 	virtual void LoadWord(uint32_t w, uint8_t rt);
 	virtual uint32_t GetWord(uint8_t rt);
@@ -85,4 +90,5 @@ public:
 	virtual void MoveControlToCoprocessor(uint8_t rd, uint32_t control);
 	virtual uint32_t MoveFromCoprocessor(uint8_t rd);
 	virtual void MoveToCoprocessor(uint8_t rd, uint32_t data);
+	void ReturnFromInterrupt();
 };
