@@ -108,11 +108,13 @@ void Cop0::pushInterruptBit(bool interrupt_enable)
 void Cop0::Operation(uint32_t cop_fun)
 {
 	//TODO: implement cop0 operation
+	throw 0;
 }
 
 void Cop0::LoadWord(uint32_t w, uint8_t rt)
 {
 	//TODO: implement cop0 loadword
+	throw 0;
 }
 
 uint32_t Cop0::GetWord(uint8_t rt)

@@ -51,7 +51,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		uint8_t copnum = opcode & 0x3;
 		JTypeInstruction j = getJTypeFields(instruction_word);
 		
-		if (j.target & 2000000)
+		if (j.target & 0x2000000)
 		{
 			if (copnum == 0 && ((j.target&0x3f) == 0x10)) //rfe instruction
 			{
@@ -842,7 +842,7 @@ void R3000A::Run()
 	while (is_running)
 	{
 		Step();
-		std::cout <<std::dec<< i++ << std::endl;
+		//std::cout <<std::hex<< pc << std::endl;
 	}
 }
 
