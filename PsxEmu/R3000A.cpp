@@ -464,28 +464,28 @@ inline void R3000A::Jr(uint8_t rd, uint8_t rs, uint8_t rt)
 	//TODO: The effective target address in GPR rs must be naturally aligned. If either of the two	least - significant bits are not - zero, then an Address Error exception occurs, not for the jump instruction, but when the branch target is subsequently fetched as an instruction.
 }
 
-inline void R3000A::Lb(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lb(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
 	write_register(rt, m_memory.read(read_register(base) + signed_offset));
 }
 
-inline void R3000A::Lbu(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lbu(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
 	write_register(rt, m_memory.read(read_register(base) + signed_offset));
 }
 
-inline void R3000A::Lh(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lh(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
 	write_register(rt, m_memory.read_halfword(read_register(base) + signed_offset));
 }
 
-inline void R3000A::Lhu(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lhu(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
@@ -498,18 +498,18 @@ inline void R3000A::Lui(uint8_t rt, uint8_t rs, uint16_t imm)
 	write_register(rt, t);
 }
 
-inline void R3000A::Lw(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lw(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
 	write_register(rt, m_memory.read_word(read_register(base) + signed_offset));
 }
 
-inline void R3000A::Lwcz(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lwcz(uint8_t rt, uint8_t base, uint16_t offset)
 {
 }
 
-inline void R3000A::Lwl(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lwl(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
@@ -519,7 +519,7 @@ inline void R3000A::Lwl(uint8_t base, uint8_t rt, uint16_t offset)
 	write_register(rt, w);
 }
 
-inline void R3000A::Lwr(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Lwr(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
@@ -590,14 +590,14 @@ inline void R3000A::Rfe(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 }
 
-inline void R3000A::Sb(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Sb(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//todo: address error
 	int16_t signed_offset = offset;
 	m_memory.write(read_register(base) + signed_offset, read_register(rt));
 }
 
-inline void R3000A::Sh(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Sh(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//todo: address error
 	int16_t signed_offset = offset;
@@ -700,18 +700,18 @@ inline void R3000A::Subu(uint8_t rd, uint8_t rs, uint8_t rt)
 	write_register(rd, result);
 }
 
-inline void R3000A::Sw(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Sw(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t _offset = (int16_t)offset;
 	m_memory.write_word(read_register(base) + _offset, read_register(rt));
 	//todo:: address error
 }
 
-inline void R3000A::Swcz(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Swcz(uint8_t rt, uint8_t base, uint16_t offset)
 {
 }
 
-inline void R3000A::Swl(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Swl(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
@@ -720,7 +720,7 @@ inline void R3000A::Swl(uint8_t base, uint8_t rt, uint16_t offset)
 	m_memory.write_halfword(read_register(base) + signed_offset, w);
 }
 
-inline void R3000A::Swr(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::Swr(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);

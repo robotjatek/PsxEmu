@@ -105,15 +105,15 @@ public:
 	inline void Jal(uint32_t target);
 	inline void Jalr(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Jr(uint8_t rd, uint8_t rs, uint8_t rt);
-	inline void Lb(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Lbu(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Lh(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Lhu(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lb(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Lbu(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Lh(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Lhu(uint8_t rt, uint8_t base, uint16_t offset);
 	inline void Lui(uint8_t rt, uint8_t rs, uint16_t imm);
-	inline void Lw(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Lwcz(uint8_t base, uint8_t rt, uint16_t offset); //implemented in decode function
-	inline void Lwl(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Lwr(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Lw(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Lwcz(uint8_t rt, uint8_t base, uint16_t offset); //implemented in decode function
+	inline void Lwl(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Lwr(uint8_t rt, uint8_t base, uint16_t offset);
 	inline void Mfcz(uint8_t rd, uint8_t rs, uint8_t rt); //implemented in decode function
 	inline void Mfhi(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Mflo(uint8_t rd, uint8_t rs, uint8_t rt);
@@ -126,8 +126,8 @@ public:
 	inline void Or(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Ori(uint8_t rt, uint8_t rs, uint16_t imm);
 	inline void Rfe(uint8_t rd, uint8_t rs, uint8_t rt);
-	inline void Sb(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Sh(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Sb(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Sh(uint8_t rt, uint8_t base, uint16_t offset);
 	inline void Sll(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Sllv(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Slt(uint8_t rd, uint8_t rs, uint8_t rt);
@@ -140,10 +140,10 @@ public:
 	inline void Srlv(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Sub(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Subu(uint8_t rd, uint8_t rs, uint8_t rt);
-	inline void Sw(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Swcz(uint8_t base, uint8_t rt, uint16_t offset); //implemented in decode function
-	inline void Swl(uint8_t base, uint8_t rt, uint16_t offset);
-	inline void Swr(uint8_t base, uint8_t rt, uint16_t offset);
+	inline void Sw(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Swcz(uint8_t rt, uint8_t base, uint16_t offset); //implemented in decode function
+	inline void Swl(uint8_t rt, uint8_t base, uint16_t offset);
+	inline void Swr(uint8_t rt, uint8_t base, uint16_t offset);
 	inline void Syscall(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Xor(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Xori(uint8_t rt, uint8_t rs, uint16_t imm);
