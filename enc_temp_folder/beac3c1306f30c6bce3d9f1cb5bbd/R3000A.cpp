@@ -410,17 +410,8 @@ inline void R3000A::Div(uint8_t rd, uint8_t rs, uint8_t rt)
 	}
 	else
 	{
-		//from PSX-guide
-		if (_rs >= 0)
-		{
-			lo = 0xffffffff;
-			hi = _rs;
-		}
-		else
-		{
-			lo = 1;
-			hi = _rs;
-		}
+		lo = 0;
+		hi = 0;
 		//TODO: check if this is correct
 		//XXX: number/0 = +inf && 0/0=NaN (????)
 		//XXX: from the docs: if the divisior in rt is zero, the aritmetic result is undefined
