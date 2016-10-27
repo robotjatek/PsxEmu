@@ -1,4 +1,5 @@
 #include "R3000A.h"
+#include "Cop0.h"
 //TODO: sign extend függvény megírása és meghívása minden signed memórahozzáféréshez
 
 void R3000A::Step()
@@ -25,6 +26,7 @@ inline uint32_t R3000A::Fetch()
 inline void R3000A::Decode(uint32_t instruction_word)
 {
 	delay_slot = false;
+
 	//TODO: execute decoded instruction
 	uint8_t opcode = (instruction_word & 0xFC000000) >> 26;
 	if (opcode == 0) //opcode = 0
@@ -50,10 +52,10 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		//COPz
 		uint8_t copnum = opcode & 0x3;
 		JTypeInstruction j = getJTypeFields(instruction_word);
-		
+
 		if (j.target & 0x2000000)
 		{
-			if (copnum == 0 && ((j.target&0x3f) == 0x10)) //rfe instruction
+			if (copnum == 0 && ((j.target & 0x3f) == 0x10)) //rfe instruction
 			{
 				m_cop0->ReturnFromInterrupt();
 				exception_pending = false;
@@ -66,7 +68,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		else
 		{
 			RTypeInstruction r = getRTypeFields(instruction_word);
-			
+
 			if (r.rs == 0)
 			{
 				//mfcz
@@ -116,11 +118,11 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	if (delay_slot)
 	{
 		Decode(Fetch());
-		if (!exception_pending) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
+		//	if (!exception_pending) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
 		{
 			pc = delay_slot_address;
 		}
-	
+
 	}
 }
 
@@ -200,7 +202,7 @@ inline void R3000A::JtypeNull(uint32_t target)
 
 inline void R3000A::Null(uint8_t op, uint8_t funct)
 {
-	std::cout << "unrecognized opcode: " << (int)op << "funct: " << (int)funct << "pc: "<<std::hex<<pc<<std::endl;
+	std::cout << "unrecognized opcode: " << (int)op << "funct: " << (int)funct << "pc: " << std::hex << pc << std::endl;
 	this->is_running = false;
 }
 
@@ -291,10 +293,10 @@ inline void R3000A::Andi(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Beq(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int16_t)imm;
-	offset *= 4;
 	if (read_register(rs) == read_register(rt))
 	{
+		int32_t offset = (int16_t)imm;
+		offset *= 4;
 		delay_slot_address = pc + offset;
 		delay_slot = true;
 	}
@@ -303,10 +305,11 @@ inline void R3000A::Beq(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
 {
-	int32_t t_offset = (int16_t)offset;
-	t_offset *= 4;
-	if (read_register(rs) >= 0)
+	int32_t _rs = (int32_t)read_register(rs);
+	if (_rs >= 0)
 	{
+		int32_t t_offset = (int16_t)offset;
+		t_offset *= 4;
 		delay_slot_address = pc + t_offset;
 		delay_slot = true;
 	}
@@ -314,11 +317,12 @@ inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
 
 inline void R3000A::Bgezal(uint8_t rt, uint8_t rs, uint16_t offset)
 {
-	int32_t t_offset = (int16_t)offset;
-	t_offset *= 4;
 	write_register(31, pc + 4); //PC is already pointing to the next instruction, so here it should be increased by 4 and not 8 bytes, which is the second instruction after the branch (probably)
-	if (read_register(rs) >= 0)
+	int32_t _rs = (int32_t)read_register(rs);
+	if (_rs >= 0)
 	{
+		int32_t t_offset = (int16_t)offset;
+		t_offset *= 4;
 		delay_slot_address = pc + t_offset;
 		delay_slot = true;
 	}
@@ -326,10 +330,11 @@ inline void R3000A::Bgezal(uint8_t rt, uint8_t rs, uint16_t offset)
 
 inline void R3000A::Bgtz(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int16_t)imm;
-	offset *= 4;
-	if (read_register(rs) > 0)
+	int32_t _rs = (int32_t)read_register(rs);
+	if (_rs > 0)
 	{
+		int32_t offset = (int16_t)imm;
+		offset *= 4;
 		delay_slot_address = pc + offset;
 		delay_slot = true;
 	}
@@ -337,10 +342,11 @@ inline void R3000A::Bgtz(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Blez(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int16_t)imm;
-	offset *= 4;
-	if (read_register(rs) <= 0)
+	int32_t _rs = (int32_t)read_register(rs);
+	if (_rs <= 0)
 	{
+		int32_t offset = (int16_t)imm;
+		offset *= 4;
 		delay_slot_address = pc + offset;
 		delay_slot = true;
 	}
@@ -348,10 +354,11 @@ inline void R3000A::Blez(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bltz(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int16_t)imm;
-	offset *= 4;
-	if (read_register(rs) < 0)
+	int32_t _rs = (int32_t)read_register(rs);
+	if (_rs < 0)
 	{
+		int32_t offset = (int16_t)imm;
+		offset *= 4;
 		delay_slot_address = pc + offset;
 		delay_slot = true;
 	}
@@ -359,11 +366,12 @@ inline void R3000A::Bltz(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bltzal(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t t_offset = (int16_t)imm;
-	t_offset *= 4;
 	write_register(31, pc + 4); //PC is already pointing to the next instruction, so here it should be increased by 4 and not 8 bytes, which is the second instruction after the branch (probably)
-	if (read_register(rs) < 0)
+	int32_t _rs = (int32_t)read_register(rs);
+	if (_rs < 0)
 	{
+		int32_t t_offset = (int16_t)imm;
+		t_offset *= 4;
 		delay_slot_address = pc + t_offset;
 		delay_slot = true;
 	}
@@ -371,10 +379,10 @@ inline void R3000A::Bltzal(uint8_t rt, uint8_t rs, uint16_t imm)
 
 inline void R3000A::Bne(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t offset = (int16_t)imm;
-	offset *= 4;
 	if (read_register(rs) != read_register(rt))
 	{
+		int32_t offset = (int16_t)imm;
+		offset *= 4;
 		delay_slot_address = pc + offset;
 		delay_slot = true;
 	}
@@ -401,12 +409,18 @@ inline void R3000A::Ctcz(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Div(uint8_t rd, uint8_t rs, uint8_t rt)
 {
+	//TODO: 36 cycles
 	int32_t _rs = read_register(rs);
 	int32_t _rt = read_register(rt);
 	if (_rt > 0)
 	{
 		lo = _rs / _rt;
 		hi = _rs % _rt;
+	}
+	else if (_rs == 0x80000000 && _rt == 0xffffffff)
+	{
+		lo = 0x80000000;
+		hi = 0;
 	}
 	else
 	{
@@ -438,8 +452,8 @@ inline void R3000A::Divu(uint8_t rd, uint8_t rs, uint8_t rt)
 	}
 	else
 	{
-		lo = 0;
-		hi = 0;
+		lo = 0xffffffff;
+		hi = _rs;
 	}
 
 }
@@ -477,7 +491,8 @@ inline void R3000A::Lb(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read(read_register(base) + signed_offset));
+	int32_t sign_extended_value = (int8_t)m_memory.read(read_register(base) + signed_offset);
+	write_register(rt, sign_extended_value);
 }
 
 inline void R3000A::Lbu(uint8_t rt, uint8_t base, uint16_t offset)
@@ -491,7 +506,8 @@ inline void R3000A::Lh(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read_halfword(read_register(base) + signed_offset));
+	int32_t sign_extended_value = (int16_t)m_memory.read_halfword(read_register(base) + signed_offset);
+	write_register(rt, sign_extended_value);
 }
 
 inline void R3000A::Lhu(uint8_t rt, uint8_t base, uint16_t offset)
@@ -503,13 +519,14 @@ inline void R3000A::Lhu(uint8_t rt, uint8_t base, uint16_t offset)
 
 inline void R3000A::Lui(uint8_t rt, uint8_t rs, uint16_t imm)
 {
-	int32_t t = ((int32_t)imm) << 16;
+	int32_t t = ((int16_t)imm) << 16;
 	write_register(rt, t);
 }
 
 inline void R3000A::Lw(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
+	//TODO: isolate cache
 	int16_t signed_offset = offset;
 	write_register(rt, m_memory.read_word(read_register(base) + signed_offset));
 }
@@ -568,7 +585,7 @@ inline void R3000A::Mtlo(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Mult(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	int64_t result = read_register(rs) * read_register(rt);
+	int64_t result = ((int32_t)read_register(rs)) * ((int32_t)read_register(rt));
 	lo = result & 0x00000000ffffffff;
 	hi = (result & 0xffffffff00000000) >> 32;
 }
@@ -602,15 +619,31 @@ inline void R3000A::Rfe(uint8_t rd, uint8_t rs, uint8_t rt)
 inline void R3000A::Sb(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//todo: address error
-	int16_t signed_offset = offset;
-	m_memory.write(read_register(base) + signed_offset, read_register(rt));
+	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
+	{
+		int32_t signed_offset = (int16_t)offset;
+		m_memory.write(read_register(base) + signed_offset, read_register(rt));
+	}
+	else
+	{
+		std::cout << "Cache is isolated" << std::endl;
+		//todo: implement cache
+	}
 }
 
 inline void R3000A::Sh(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//todo: address error
-	int16_t signed_offset = offset;
-	m_memory.write_halfword(read_register(base) + signed_offset, read_register(rt));
+	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
+	{
+		int16_t signed_offset = offset;
+		m_memory.write_halfword(read_register(base) + signed_offset, read_register(rt));
+	}
+	else
+	{
+		std::cout << "Cache is isolated" << std::endl;
+		//todo: implement cache
+	}
 }
 
 inline void R3000A::Sll(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -620,7 +653,7 @@ inline void R3000A::Sll(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Sllv(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, read_register(rt) << read_register(rs));
+	write_register(rd, read_register(rt) << (read_register(rs) & 0x1f));
 }
 
 inline void R3000A::Slt(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -665,12 +698,12 @@ inline void R3000A::Sltu(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Sra(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, (int32_t)read_register(rt) >> rs);
+	write_register(rd, ((int32_t)read_register(rt)) >> rs);
 }
 
 inline void R3000A::Srav(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, (int32_t)read_register(rt) >> read_register(rs));
+	write_register(rd, ((int32_t)read_register(rt)) >> (read_register(rs)&0x1f));
 }
 
 inline void R3000A::Srl(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -680,7 +713,7 @@ inline void R3000A::Srl(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Srlv(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, read_register(rt) >> read_register(rs));
+	write_register(rd, read_register(rt) >> (read_register(rs)&0x1f));
 }
 
 inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -711,9 +744,17 @@ inline void R3000A::Subu(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Sw(uint8_t rt, uint8_t base, uint16_t offset)
 {
-	int16_t _offset = (int16_t)offset;
-	m_memory.write_word(read_register(base) + _offset, read_register(rt));
 	//todo:: address error
+	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
+	{
+		int32_t _offset = (int16_t)offset;
+		m_memory.write_word(read_register(base) + _offset, read_register(rt));
+	}
+	//else
+	{
+		//std::cout << "Cache is isolated" << std::endl;
+		//todo: implement cache
+	}
 }
 
 inline void R3000A::Swcz(uint8_t rt, uint8_t base, uint16_t offset)
@@ -757,7 +798,7 @@ inline void R3000A::Xori(uint8_t rt, uint8_t rs, uint16_t imm)
 
 R3000A::R3000A(Memory & mem) : m_memory(mem)
 {
-	this->pc = BIOS_START; //reset vector - start of the BIOS: 0xbfc00000
+	this->pc = BIOS_START_UNCACHED; //reset vector - start of the BIOS: 0xbfc00000
 	this->kernel_mode = false;
 	this->exception_pending = false;
 	this->delay_slot = false;
@@ -790,7 +831,7 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 	rtypes[0x11] = &R3000A::Mthi;
 	rtypes[0x13] = &R3000A::Mtlo;
 	rtypes[0x18] = &R3000A::Mult;
-	rtypes[0x19] = &R3000A::Mult;
+	rtypes[0x19] = &R3000A::Multu;
 	rtypes[0x27] = &R3000A::Nor;
 	rtypes[0x25] = &R3000A::Or;
 	rtypes[0x00] = &R3000A::Sll;

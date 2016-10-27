@@ -20,12 +20,12 @@ uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool bran
 	pushKernelBitAndInterruptBit();
 
 	cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::ExceptionCode;
-	cop_registers[RegisterNames::Cause] |= exceptioncode;
+	cop_registers[RegisterNames::Cause] |= (exceptioncode << 2);
 
 	if (branch_delay)
 	{
 		cop_registers[RegisterNames::Cause] |= CauseRegisterFields::BranchDelay;
-		cop_registers[RegisterNames::Exception_PC] = pc - 8;
+		cop_registers[RegisterNames::Exception_PC] = pc - 4; //TODO: -4 or -8?
 	}
 	else
 	{
@@ -40,7 +40,7 @@ uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool bran
 	else if (exceptioncode == ExceptionCodes::CpU)
 	{
 		cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::CoprocessorError;
-		cop_registers[RegisterNames::Cause] |= coprocessor_error;
+		cop_registers[RegisterNames::Cause] |= (((uint32_t)coprocessor_error) << 28);
 	}
 
 	return cop_registers[RegisterNames::Status] & StatusRegisterFields::BEV ? GENERAL_EXCEPTION_BEV_1_ADDRESS : GENERAL_EXCEPTION_BEV_0_ADDRESS;
@@ -147,4 +147,9 @@ void Cop0::MoveToCoprocessor(uint8_t rd, uint32_t data)
 void Cop0::ReturnFromInterrupt()
 {
 	popKernelBitAndInterruptBit();
+}
+
+bool Cop0::GetStatusRegisterBit(StatusRegisterFields f)
+{
+	return cop_registers[RegisterNames::Status] & f;
 }

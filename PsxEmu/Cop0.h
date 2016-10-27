@@ -8,29 +8,6 @@
 class Cop0 : public ICoprocessor
 {
 private:
-	enum StatusRegisterFields
-	{
-		CU = 0xF0000000, //coprocessor usuable
-		RE = 0x2000000, //reverse endianness
-		BEV = 0x400000, //boot exception vectors;  when BEV == 1, the CPU uses the ROM (kseg1)space exception entry point(described in a later chapter). BEV is usually set to zero in running systems; this relocates the exception  vectors.to  RAM  addresses, speeding  accesses  and allowing the use of “user supplied” exception service routines.
-		TS = 0x200000, //TLB shutdown - If set to 1, the processor is dead in the water and needs to be reset.
-		PE = 0x100000, //cache parity error
-		CM = 0x80000, //Set to 1 if the most recent data cache load missed, but only if IsC is set.
-		PZ = 0x40000, //If set to 1, uses space parity for outgoing data.
-		SvC = 0x20000, //If set, the cache control lines affect the instruction cache rather than the data cache.
-		IsC = 0x10000, // If set, the data cache is detached from main memory.
-		IntMask = 0xFF00, //While these bits are set, the corresponding interrupts are masked and do not cause interrupt exceptions.
-		KUo = 0x20, //Kernel/User old. This is the privilege state two exceptions previously. A ‘0’ indicates kernel mode.
-		IEo = 0x10, // Interrupt Enable old.This is the global interrupt enable state two exceptions previously.A ‘1’ indicates that interrupts were enabled, 	subject to the IM mask.
-		KUp = 0x8, //Previous kernel/user mode bit (1 = user mode)
-		IEp = 0x4, //Previous interrupt enable bit (0 = mask all interrupts)
-		KUc = 0x2, //current user/kernel mode
-		IEc = 0x1, //current interrupt enable
-
-		KernelModeBits = 0x2A,
-		InterruptBits = 0x15,
-	};
-
 	enum CauseRegisterFields
 	{
 		BranchDelay = 0x80000000,	//bd is set (1), if the last exception was taken while the processor was executing in the branch delay slot. If so, then the EPC will be rolled back to point to the branch instruction, so that it can be re - executed and the branch direction re - determined.
@@ -77,6 +54,29 @@ public:
 		Ovf = 12	//Arithmetic overflow exception
 	};
 
+	enum StatusRegisterFields
+	{
+		CU = 0xF0000000, //coprocessor usuable
+		RE = 0x2000000, //reverse endianness
+		BEV = 0x400000, //boot exception vectors;  when BEV == 1, the CPU uses the ROM (kseg1)space exception entry point(described in a later chapter). BEV is usually set to zero in running systems; this relocates the exception  vectors.to  RAM  addresses, speeding  accesses  and allowing the use of “user supplied” exception service routines.
+		TS = 0x200000, //TLB shutdown - If set to 1, the processor is dead in the water and needs to be reset.
+		PE = 0x100000, //cache parity error
+		CM = 0x80000, //Set to 1 if the most recent data cache load missed, but only if IsC is set.
+		PZ = 0x40000, //If set to 1, uses space parity for outgoing data.
+		SvC = 0x20000, //If set, the cache control lines affect the instruction cache rather than the data cache.
+		IsC = 0x10000, // If set, the data cache is detached from main memory.
+		IntMask = 0xFF00, //While these bits are set, the corresponding interrupts are masked and do not cause interrupt exceptions.
+		KUo = 0x20, //Kernel/User old. This is the privilege state two exceptions previously. A ‘0’ indicates kernel mode.
+		IEo = 0x10, // Interrupt Enable old.This is the global interrupt enable state two exceptions previously.A ‘1’ indicates that interrupts were enabled, 	subject to the IM mask.
+		KUp = 0x8, //Previous kernel/user mode bit (1 = user mode)
+		IEp = 0x4, //Previous interrupt enable bit (0 = mask all interrupts)
+		KUc = 0x2, //current user/kernel mode
+		IEc = 0x1, //current interrupt enable
+
+		KernelModeBits = 0x2A,
+		InterruptBits = 0x15,
+	};
+
 	Cop0();
 	virtual ~Cop0();
 	void enableStatusBits(uint32_t bits);
@@ -91,4 +91,5 @@ public:
 	virtual uint32_t MoveFromCoprocessor(uint8_t rd);
 	virtual void MoveToCoprocessor(uint8_t rd, uint32_t data);
 	void ReturnFromInterrupt();
+	bool GetStatusRegisterBit(StatusRegisterFields f);
 };

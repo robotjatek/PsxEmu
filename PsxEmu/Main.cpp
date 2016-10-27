@@ -27,6 +27,10 @@ the instruction after a branch, a jump or a load is always executed! Even if the
  -----------------------------------------------------------------------------------------------------
  SIGN EXTENSION: ha az unsigned értéket elõtt egy ugyanolyan méretû signedra kasztolom, majd berakom egy nagyobb méretû tárolóba, akkor a sign extension automatikusan végbemegy
  nagyobb méretû unsignedból kissebb méretû signedba átrakva is jó a sign
+ -----------------------------------------------------------------------------------------------------
+ Branch and link mindig elmenti a címet az RA regiszterbe, akkor is, ha a feltétel nem teljesül
+ --------------------------------------------------------------------------------------------------------
+ DIV mûvelet: 36 ciklus, a pipeline nem áll le, az utasításokat folyamatosan végrehajtja továbbra is, majd 36 ciklus után az eredmény a hi és lo regiszterekben
 */
 
 
