@@ -243,3 +243,10 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+#log files
+*.txt
+*.log
+
+# Binary files
+*.bin
