@@ -27,6 +27,12 @@
     <ClCompile Include="Cop0.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Gpu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DMA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="R3000A.h">
@@ -39,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ICoprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DMA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

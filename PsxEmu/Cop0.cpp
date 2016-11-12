@@ -16,8 +16,7 @@ Cop0::~Cop0()
 uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay, uint8_t coprocessor_error, uint32_t badvaddr)
 {
 	//todo: interrupt/exception mask
-	std::cout << "Exception occured" << std::endl;
-	pushKernelBitAndInterruptBit();
+	std::cout << "Exception occured. Code: " << std::hex << exceptioncode << std::endl;
 
 	cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::ExceptionCode;
 	cop_registers[RegisterNames::Cause] |= (exceptioncode << 2);
@@ -42,7 +41,17 @@ uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool bran
 		cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::CoprocessorError;
 		cop_registers[RegisterNames::Cause] |= (((uint32_t)coprocessor_error) << 28);
 	}
+	else if (exceptioncode == ExceptionCodes::Int)
+	{
+		cop_registers[RegisterNames::Cause] |= 0x400; //Cause.bit10 gets set on interrupts
+		//TODO: implement software interrupts: CauseRegisterFields::SoftwareInterrupts
+		if (!((cop_registers[RegisterNames::Status] & 0x400) && (cop_registers[RegisterNames::Status] & 0x1))) //interrupts only raise when status register bit10 and bit0 are set
+		{
+			return pc; //if the interrupts are disabled return to control flow like nothing happened
+		}
+	}
 
+	pushKernelBitAndInterruptBit(); //TODO: should be here or on the top of that function?
 	return cop_registers[RegisterNames::Status] & StatusRegisterFields::BEV ? GENERAL_EXCEPTION_BEV_1_ADDRESS : GENERAL_EXCEPTION_BEV_0_ADDRESS;
 }
 
@@ -105,7 +114,7 @@ void Cop0::pushInterruptBit(bool interrupt_enable)
 	this->cop_registers[RegisterNames::Status] |= bits;
 }
 
-void Cop0::Operation(uint32_t cop_fun)
+void Cop0::Operation(uint32_t)
 {
 	//TODO: implement cop0 operation
 	throw 0;
@@ -123,13 +132,13 @@ uint32_t Cop0::GetWord(uint8_t rt)
 	return 0;
 }
 
-uint32_t Cop0::MoveControlFromCoprocessor(uint8_t rd)
+uint32_t Cop0::MoveControlFromCoprocessor(uint8_t)
 {
 	//unusuable on Cop0
 	return uint32_t();
 }
 
-void Cop0::MoveControlToCoprocessor(uint8_t rd, uint32_t control)
+void Cop0::MoveControlToCoprocessor(uint8_t, uint32_t)
 {
 	//unusuable on Cop0
 }
@@ -142,6 +151,7 @@ uint32_t Cop0::MoveFromCoprocessor(uint8_t rd)
 void Cop0::MoveToCoprocessor(uint8_t rd, uint32_t data)
 {
 	cop_registers[rd] = data;
+	//TODO:: do not overwrite readonly fields!!!
 }
 
 void Cop0::ReturnFromInterrupt()
@@ -151,5 +161,5 @@ void Cop0::ReturnFromInterrupt()
 
 bool Cop0::GetStatusRegisterBit(StatusRegisterFields f)
 {
-	return cop_registers[RegisterNames::Status] & f;
+	return (cop_registers[RegisterNames::Status] & f) ? true : false;
 }

@@ -4,6 +4,7 @@
 
 void R3000A::Step()
 {
+	HandleIRQReqests();
 	Decode(Fetch());
 }
 
@@ -182,19 +183,19 @@ inline JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
 	return ret;
 }
 
-inline void R3000A::RtypeNull(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::RtypeNull(uint8_t, uint8_t, uint8_t)
 {
 	RTypeInstruction r = getRTypeFields(m_memory.read_word(pc - 4));
 	Null(r.op, r.funct);
 }
 
-inline void R3000A::ItypeNull(uint8_t base, uint8_t rt, uint16_t offset)
+inline void R3000A::ItypeNull(uint8_t, uint8_t, uint16_t)
 {
 	ITypeInstruction i = getITypeFields(m_memory.read_word(pc - 4));
 	Null(i.op, 0);
 }
 
-inline void R3000A::JtypeNull(uint32_t target)
+inline void R3000A::JtypeNull(uint32_t)
 {
 	JTypeInstruction j = getJTypeFields(m_memory.read_word(pc - 4));
 	Null(j.op, 0);
@@ -303,7 +304,7 @@ inline void R3000A::Beq(uint8_t rt, uint8_t rs, uint16_t imm)
 
 }
 
-inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
+inline void R3000A::Bgez(uint8_t, uint8_t rs, uint16_t offset)
 {
 	int32_t _rs = (int32_t)read_register(rs);
 	if (_rs >= 0)
@@ -315,7 +316,7 @@ inline void R3000A::Bgez(uint8_t rt, uint8_t rs, uint16_t offset)
 	}
 }
 
-inline void R3000A::Bgezal(uint8_t rt, uint8_t rs, uint16_t offset)
+inline void R3000A::Bgezal(uint8_t, uint8_t rs, uint16_t offset)
 {
 	write_register(31, pc + 4); //PC is already pointing to the next instruction, so here it should be increased by 4 and not 8 bytes, which is the second instruction after the branch (probably)
 	int32_t _rs = (int32_t)read_register(rs);
@@ -328,7 +329,7 @@ inline void R3000A::Bgezal(uint8_t rt, uint8_t rs, uint16_t offset)
 	}
 }
 
-inline void R3000A::Bgtz(uint8_t rt, uint8_t rs, uint16_t imm)
+inline void R3000A::Bgtz(uint8_t, uint8_t rs, uint16_t imm)
 {
 	int32_t _rs = (int32_t)read_register(rs);
 	if (_rs > 0)
@@ -340,7 +341,7 @@ inline void R3000A::Bgtz(uint8_t rt, uint8_t rs, uint16_t imm)
 	}
 }
 
-inline void R3000A::Blez(uint8_t rt, uint8_t rs, uint16_t imm)
+inline void R3000A::Blez(uint8_t, uint8_t rs, uint16_t imm)
 {
 	int32_t _rs = (int32_t)read_register(rs);
 	if (_rs <= 0)
@@ -352,7 +353,7 @@ inline void R3000A::Blez(uint8_t rt, uint8_t rs, uint16_t imm)
 	}
 }
 
-inline void R3000A::Bltz(uint8_t rt, uint8_t rs, uint16_t imm)
+inline void R3000A::Bltz(uint8_t, uint8_t rs, uint16_t imm)
 {
 	int32_t _rs = (int32_t)read_register(rs);
 	if (_rs < 0)
@@ -364,7 +365,7 @@ inline void R3000A::Bltz(uint8_t rt, uint8_t rs, uint16_t imm)
 	}
 }
 
-inline void R3000A::Bltzal(uint8_t rt, uint8_t rs, uint16_t imm)
+inline void R3000A::Bltzal(uint8_t, uint8_t rs, uint16_t imm)
 {
 	write_register(31, pc + 4); //PC is already pointing to the next instruction, so here it should be increased by 4 and not 8 bytes, which is the second instruction after the branch (probably)
 	int32_t _rs = (int32_t)read_register(rs);
@@ -388,26 +389,26 @@ inline void R3000A::Bne(uint8_t rt, uint8_t rs, uint16_t imm)
 	}
 }
 
-inline void R3000A::Break(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Break(uint8_t, uint8_t, uint8_t)
 {
 	pc = this->m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Bp, this->delay_slot);
 	this->exception_pending = true;
 	this->delay_slot = false;
 }
 
-inline void R3000A::Cfcz(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Cfcz(uint8_t, uint8_t, uint8_t)
 {
 }
 
-inline void R3000A::Copz(uint32_t cop_fun)
+inline void R3000A::Copz(uint32_t)
 {
 }
 
-inline void R3000A::Ctcz(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Ctcz(uint8_t, uint8_t, uint8_t)
 {
 }
 
-inline void R3000A::Div(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Div(uint8_t, uint8_t rs, uint8_t rt)
 {
 	//TODO: 36 cycles
 	int32_t _rs = read_register(rs);
@@ -441,7 +442,7 @@ inline void R3000A::Div(uint8_t rd, uint8_t rs, uint8_t rt)
 	}
 }
 
-inline void R3000A::Divu(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Divu(uint8_t, uint8_t rs, uint8_t rt)
 {
 	uint32_t _rs = read_register(rs);
 	uint32_t _rt = read_register(rt);
@@ -472,7 +473,7 @@ inline void R3000A::Jal(uint32_t target)
 	delay_slot = true;
 }
 
-inline void R3000A::Jalr(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Jalr(uint8_t rd, uint8_t rs, uint8_t)
 {
 	write_register(rd, pc + 4);
 	delay_slot_address = read_register(rs);
@@ -480,7 +481,7 @@ inline void R3000A::Jalr(uint8_t rd, uint8_t rs, uint8_t rt)
 	//TODO: The effective target address in GPR rs must be naturally aligned. If either of the two	least - significant bits are not - zero, then an Address Error exception occurs, not for the jump instruction, but when the branch target is subsequently fetched as an instruction.
 }
 
-inline void R3000A::Jr(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Jr(uint8_t, uint8_t rs, uint8_t)
 {
 	delay_slot_address = read_register(rs);
 	delay_slot = true;
@@ -517,7 +518,7 @@ inline void R3000A::Lhu(uint8_t rt, uint8_t base, uint16_t offset)
 	write_register(rt, m_memory.read_halfword(read_register(base) + signed_offset));
 }
 
-inline void R3000A::Lui(uint8_t rt, uint8_t rs, uint16_t imm)
+inline void R3000A::Lui(uint8_t rt, uint8_t, uint16_t imm)
 {
 	int32_t t = ((int16_t)imm) << 16;
 	write_register(rt, t);
@@ -531,7 +532,7 @@ inline void R3000A::Lw(uint8_t rt, uint8_t base, uint16_t offset)
 	write_register(rt, m_memory.read_word(read_register(base) + signed_offset));
 }
 
-inline void R3000A::Lwcz(uint8_t rt, uint8_t base, uint16_t offset)
+inline void R3000A::Lwcz(uint8_t, uint8_t, uint16_t)
 {
 }
 
@@ -555,42 +556,42 @@ inline void R3000A::Lwr(uint8_t rt, uint8_t base, uint16_t offset)
 	write_register(rt, w);
 }
 
-inline void R3000A::Mfcz(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mfcz(uint8_t, uint8_t, uint8_t)
 {
 }
 
-inline void R3000A::Mfhi(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mfhi(uint8_t rd, uint8_t, uint8_t)
 {
 	write_register(rd, hi);
 }
 
-inline void R3000A::Mflo(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mflo(uint8_t rd, uint8_t, uint8_t)
 {
 	write_register(rd, lo);
 }
 
-inline void R3000A::Mtcz(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mtcz(uint8_t, uint8_t, uint8_t)
 {
 }
 
-inline void R3000A::Mthi(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mthi(uint8_t, uint8_t rs, uint8_t)
 {
 	hi = read_register(rs);
 }
 
-inline void R3000A::Mtlo(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mtlo(uint8_t, uint8_t rs, uint8_t)
 {
 	lo = read_register(rs);
 }
 
-inline void R3000A::Mult(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Mult(uint8_t, uint8_t rs, uint8_t rt)
 {
 	int64_t result = ((int32_t)read_register(rs)) * ((int32_t)read_register(rt));
 	lo = result & 0x00000000ffffffff;
 	hi = (result & 0xffffffff00000000) >> 32;
 }
 
-inline void R3000A::Multu(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Multu(uint8_t, uint8_t rs, uint8_t rt)
 {
 	uint64_t result = read_register(rs) * read_register(rt);
 	lo = result & 0x00000000ffffffff;
@@ -612,7 +613,7 @@ inline void R3000A::Ori(uint8_t rt, uint8_t rs, uint16_t imm)
 	write_register(rt, read_register(rs) | imm);
 }
 
-inline void R3000A::Rfe(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Rfe(uint8_t, uint8_t, uint8_t)
 {
 }
 
@@ -622,7 +623,9 @@ inline void R3000A::Sb(uint8_t rt, uint8_t base, uint16_t offset)
 	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
 	{
 		int32_t signed_offset = (int16_t)offset;
-		m_memory.write(read_register(base) + signed_offset, read_register(rt));
+		m_memory.write(read_register(base)
+			+ signed_offset,
+			(uint8_t)read_register(rt));
 	}
 	else
 	{
@@ -637,7 +640,7 @@ inline void R3000A::Sh(uint8_t rt, uint8_t base, uint16_t offset)
 	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
 	{
 		int16_t signed_offset = offset;
-		m_memory.write_halfword(read_register(base) + signed_offset, read_register(rt));
+		m_memory.write_halfword(read_register(base) + signed_offset, (uint16_t)read_register(rt));
 	}
 	else
 	{
@@ -703,7 +706,7 @@ inline void R3000A::Sra(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Srav(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, ((int32_t)read_register(rt)) >> (read_register(rs)&0x1f));
+	write_register(rd, ((int32_t)read_register(rt)) >> (read_register(rs) & 0x1f));
 }
 
 inline void R3000A::Srl(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -713,7 +716,7 @@ inline void R3000A::Srl(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Srlv(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, read_register(rt) >> (read_register(rs)&0x1f));
+	write_register(rd, read_register(rt) >> (read_register(rs) & 0x1f));
 }
 
 inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
@@ -736,8 +739,8 @@ inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Subu(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	uint32_t _rs = (int32_t)read_register(rs);
-	uint32_t _rt = (int32_t)read_register(rt);
+	uint32_t _rs = read_register(rs);
+	uint32_t _rt =  read_register(rt);
 	uint32_t result = _rs - _rt;
 	write_register(rd, result);
 }
@@ -757,7 +760,7 @@ inline void R3000A::Sw(uint8_t rt, uint8_t base, uint16_t offset)
 	}
 }
 
-inline void R3000A::Swcz(uint8_t rt, uint8_t base, uint16_t offset)
+inline void R3000A::Swcz(uint8_t, uint8_t, uint16_t)
 {
 }
 
@@ -767,7 +770,7 @@ inline void R3000A::Swl(uint8_t rt, uint8_t base, uint16_t offset)
 	uint32_t w = read_register(rt);
 	w &= 0xFFFF0000;
 	w = w >> 16;
-	m_memory.write_halfword(read_register(base) + signed_offset, w);
+	m_memory.write_halfword(read_register(base) + signed_offset, (uint16_t)w);
 }
 
 inline void R3000A::Swr(uint8_t rt, uint8_t base, uint16_t offset)
@@ -775,10 +778,10 @@ inline void R3000A::Swr(uint8_t rt, uint8_t base, uint16_t offset)
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
 	w &= 0x0000FFFF;
-	m_memory.write_halfword(read_register(base) + signed_offset, w);
+	m_memory.write_halfword(read_register(base) + signed_offset, (uint16_t)w);
 }
 
-inline void R3000A::Syscall(uint8_t rd, uint8_t rs, uint8_t rt)
+inline void R3000A::Syscall(uint8_t, uint8_t, uint8_t)
 {
 	pc = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Sys, this->delay_slot);
 	this->exception_pending = true;
@@ -794,6 +797,30 @@ inline void R3000A::Xor(uint8_t rd, uint8_t rs, uint8_t rt)
 inline void R3000A::Xori(uint8_t rt, uint8_t rs, uint16_t imm)
 {
 	write_register(rt, read_register(rs) ^ imm);
+}
+
+void R3000A::HandleIRQReqests()
+{
+	static uint32_t PrevIStat = 0; //IStat register is edge triggered, so the exception only occurs on change
+	uint32_t IStat = m_memory.GetIStatField();
+	if (IStat != PrevIStat)
+	{
+		uint32_t IMask = m_memory.GetIMaskField();
+		if (IStat & IMask)
+		{
+			uint32_t ret = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Int, this->delay_slot); //??? TODO: sholud i use Int as exceptioncode?
+			if (ret != pc)
+			{
+				pc = ret;
+				this->exception_pending = true;
+			}
+			else
+			{
+				m_cop0->disableStatusBits(0x400); //from nocash specifications: "cop0r13.bit10 is NOT a latch, ie. it gets automatically cleared as soon as "(I_STAT AND I_MASK)=zero"
+			}
+		}
+		PrevIStat = IStat;
+	}
 }
 
 R3000A::R3000A(Memory & mem) : m_memory(mem)
@@ -888,11 +915,9 @@ R3000A::~R3000A()
 void R3000A::Run()
 {
 	is_running = true;
-	int i = 0;
 	while (is_running)
 	{
 		Step();
-		//std::cout <<std::hex<< pc << std::endl;
 	}
 }
 

@@ -19,36 +19,85 @@ void Memory::set_memory_pointers(uint32_t vaddr)
 	}
 	else if ((vaddr >= UNCACHED_MIRROR_START && vaddr <= UNCACHED_MIRROR_END) || (vaddr >= CACHED_MIRROR_START && vaddr <= CACHED_MIRROR_END) || (vaddr >= MAIN_MEMORY_START && vaddr <= MAIN_MEMORY_END))
 	{
-		vaddr &= 0x1FFFFFFF;
+		vaddr = transform_virtual_address_to_physical(vaddr);
 		m_byte_ptr = &m_rawData[vaddr - MAIN_MEMORY_START];
 	}
 	else if ((vaddr >= HARDWARE_REGISTERS_START && vaddr <= HARDWARE_REGISTERS_END))
 	{
-		std::cout << "Hardware registers: " << std::hex << vaddr << std::endl;
+		//std::cout << "Hardware registers: " << std::hex << vaddr << std::endl;
 		m_byte_ptr = &(m_io_ports[vaddr - HARDWARE_REGISTERS_START]);
-		switch (vaddr)
+
+		if (vaddr >= 0x1F801C00 && vaddr <= 0x1F801FFF)
 		{
-		case 0x1f801060:
-			std::cout << "RAM size accessed" << std::endl;
-			break;
-		case 0x1f801010:
-			std::cout << "memory control accessed\n";
-			break;
-		case 0x1f801000:
-			std::cout << "Expansion 1 base address reg\n";
-			break;
-		case 0x1F801004:
-			std::cout << "Expansion 2 base address reg\n";
-			break;
-		case 0x1f801074:
-			std::cout << "Interrupt mask reg\n";
-			break;
+			//	printf("SPU register accessed: %08x\n", vaddr);
+				//TODO: implement SPU
+		}
+		else if (vaddr >= 0x1f801000 && vaddr <= 0x1f801020)
+		{
+			//Memory control 1
+			switch (vaddr)
+			{
+			case 0x1f801000:
+				printf("Expansion 1 Base Address\n");
+				break;
+			case 0x1f801004:
+				printf("Expansion 2 Base Address\n");
+				break;
+			case 0x1f801008:
+				printf("Expansion 1 Delay/Size\n");
+				break;
+			case 0x1f80100c:
+				printf("Expansion 3 Delay/Size \n");
+				break;
+			case 0x1f801010:
+				printf("BIOS ROM    Delay/Size\n");
+				break;
+			case 0x1f801014:
+				printf("SPU_DELAY   Delay/Size\n");
+				break;
+			case 0x1f801018:
+				printf("CDROM_DELAY Delay/Size\n");
+				break;
+			case 0x1f80101c:
+				printf("Expansion 2 Delay/Size\n");
+				break;
+			case 0x1f801020:
+				printf("COM_DELAY / COMMON_DELAY\n");
+				break;
+			default:
+				printf("Unhandled access: %08x\n", vaddr);
+				break;
+			}
+		}
+		else
+		{
+			switch (vaddr)
+			{
+			case 0x1f801060:
+				std::cout << "RAM size accessed" << std::endl;
+				break;
+			case 0x1f801070:
+//				std::cout << "Interrupt status reg\n";
+				break;
+			case 0x1f801074:
+//				std::cout << "Interrupt mask reg\n";
+				break;
+			case 0x1f801810:
+				printf("Gpu port\n");
+				break;
+			case 0x1f801814:
+				printf("Gpu port\n");
+				break;
+			default:
+				printf("Unhandled IO port: %08x\n", vaddr);
+				break;
+			}
 		}
 
 	}
 	else if ((vaddr >= EXPANSION_REGION1_KUSEG_START && vaddr <= EXPANSION_REGION1_KUSEG_END))
 	{
-		std::cout << "Expansion region 1" << std::hex << vaddr << std::endl;
+		std::cout << "Expansion region 1: " << std::hex << vaddr << std::endl;
 		m_byte_ptr = &(m_expansion_area1[vaddr - EXPANSION_REGION1_KUSEG_START]);
 	}
 	else if (vaddr == 0xfffe0130)
@@ -59,7 +108,7 @@ void Memory::set_memory_pointers(uint32_t vaddr)
 	}
 	else
 	{
-		std::cout << "err\n";
+		//printf("err addr: %08x\n",vaddr);
 		m_byte_ptr = nullptr;
 	}
 }
@@ -79,6 +128,8 @@ Memory::Memory()
 	bios_area = new uint8_t[BIOS_SIZE];
 	memset(&bios_area[0], 0, sizeof(bios_area));
 	m_expansion_area1 = new uint8_t[EXPANSION_REGION1_SIZE];
+	gpu = new Gpu;
+	dma = new Dma(this);
 }
 
 
@@ -90,107 +141,226 @@ Memory::~Memory()
 	delete[] m_io_ports;
 	delete[] bios_area;
 	delete[] m_expansion_area1;
+	delete dma;
+	delete gpu;
 }
 
 //"The RAM is arranged so that the addresses at 0x00xxxxxx, 0xA0xxxxxx, 0x80xxxxxx all point to the same physical memory."
 
 
-//TODO: status regiszterben a BEV (boot exception vector) 1 és 0 eseteknek utánanézni/tesztelni
 uint8_t Memory::read(uint32_t address)
 {
-	set_memory_pointers(address);
-	if (m_byte_ptr)
+	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
-		return *m_byte_ptr;
+		//DMA
+		switch (address)
+		{
+		case 0x1f8010f0:
+		{
+			//DMA Control reg
+			return (uint8_t)dma->ReadControl(); //TODO: check 8bit and 16bit reads from hardware registers
+			break;
+		}
+		case 0x1f8010f4:
+		{
+			// DMA Interrupt Register 
+			return (uint8_t)dma->ReadInterrupt();
+			break;
+		}
+		default:
+		{
+			printf("Unhandled DMA register");
+			break;
+		}
+		}
 	}
 	else
 	{
-		return 0; //holes in memory map 
+		set_memory_pointers(address);
+		if (m_byte_ptr)
+		{
+			return *m_byte_ptr;
+		}
+		else
+		{
+			return 0; //holes in memory map 
+		}
 	}
+
+	return 0;
 }
 
 uint16_t Memory::read_halfword(uint32_t address)
 {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	set_memory_pointers(address);
-	m_halfword_ptr = reinterpret_cast<uint16_t*>(m_byte_ptr);
-	if (m_halfword_ptr)
+	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
-		return *m_halfword_ptr;
+		//DMA
+		switch (address)
+		{
+		case 0x1f8010f0:
+		{
+			//DMA Control reg
+			return (uint16_t)dma->ReadControl();
+			break;
+		}
+		case 0x1f8010f4:
+		{
+			// DMA Interrupt Register 
+			return (uint16_t)dma->ReadInterrupt();
+			break;
+		}
+		default:
+		{
+			printf("Unhandled DMA register");
+			break;
+		}
+		}
 	}
 	else
 	{
-		return 0;
+		set_memory_pointers(address);
+		if (m_halfword_ptr)
+		{
+			return *m_halfword_ptr;
+		}
+		else
+		{
+			return 0;
+		}
 	}
-#else
-	return read(address) << 8 | read(address + 1); //for systems with big endian compiler
-#endif
-	}
+
+	return 0;
+}
 
 uint32_t Memory::read_word(uint32_t address)
 {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	set_memory_pointers(address);
-	m_word_ptr = reinterpret_cast<uint32_t*>(m_byte_ptr);
-	if (m_word_ptr)
+	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
-		return *m_word_ptr;
+		//DMA
+		return dma->ReadFromDMARegister(address);
+	}
+	else if (address == 0x1f801810)
+	{
+		return gpu->GetGPURead();
+	}
+	else if (address == 0x1f801814)
+	{
+		return gpu->GetGPUStatus();
 	}
 	else
 	{
-		return 0;
+		set_memory_pointers(address);
+		m_word_ptr = reinterpret_cast<uint32_t*>(m_byte_ptr);
+		if (m_word_ptr)
+		{
+			return *m_word_ptr;
+		}
+		else
+		{
+			return 0;
+		}
 	}
-#else
-	return read(address) << 24 | read(address + 1) << 16 | read(address + 2) << 8 | read(address + 3); //for systems with big endian compiler
-#endif
-	}
+//	return 0;
+}
 
 void Memory::write(uint32_t address, uint8_t data)
 {
-	set_memory_pointers(address);
-	if (m_byte_ptr)
+	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
-		*m_byte_ptr = data;
+		//DMA
+		switch (address)
+		{
+		case 0x1f8010f0:
+		{
+			//DMA Control reg
+			dma->WriteControl(data);
+			break;
+		}
+		case 0x1f8010f4:
+		{
+			// DMA Interrupt Register 
+			dma->WriteInterrupt(data);
+			break;
+		}
+		default:
+		{
+			printf("Unhandled DMA register");
+			break;
+		}
+		}
+	}
+	else
+	{
+		set_memory_pointers(address);
+		if (m_byte_ptr)
+		{
+			*m_byte_ptr = data;
+		}
 	}
 }
 
 void Memory::write_halfword(uint32_t address, uint16_t data)
 {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	set_memory_pointers(address);
-	m_halfword_ptr = reinterpret_cast<uint16_t*>(m_byte_ptr);
-	if (m_halfword_ptr && ((address <= BIOS_START || address >= BIOS_END) || (address <= BIOS_START_CACHED || address >= BIOS_END_CACHED) || (address <= BIOS_START_UNCACHED || address >= BIOS_END_UNCACHED)))
+	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
-		*m_halfword_ptr = data;
+		//DMA
+		switch (address)
+		{
+		case 0x1f8010f0:
+		{
+			//DMA Control reg
+			dma->WriteControl(data);
+			break;
+		}
+		case 0x1f8010f4:
+		{
+			// DMA Interrupt Register 
+			dma->WriteInterrupt(data);
+			break;
+		}
+		default:
+		{
+			printf("Unhandled DMA register");
+			break;
+		}
+		}
 	}
-#else
-	uint8_t v1 = data >> 8;
-	uint8_t v2 = data & 0xff;
-	write(address, v1);
-	write(address + 2, v2);
-#endif
+	else
+	{
+		set_memory_pointers(address);
+		m_halfword_ptr = reinterpret_cast<uint16_t*>(m_byte_ptr);
+		if (m_halfword_ptr && ((address <= BIOS_START || address >= BIOS_END) || (address <= BIOS_START_CACHED || address >= BIOS_END_CACHED) || (address <= BIOS_START_UNCACHED || address >= BIOS_END_UNCACHED)))
+		{
+			*m_halfword_ptr = data;
+		}
 	}
+}
 
 void Memory::write_word(uint32_t address, uint32_t data)
 {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	set_memory_pointers(address);
-	m_word_ptr = reinterpret_cast<uint32_t*>(m_byte_ptr);
-	if (m_word_ptr)
+	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
-		*m_word_ptr = data;
+		//DMA
+		dma->WriteToDMARegister(address, data);
 	}
-#else
-	uint8_t v1 = data >> 24;
-	uint8_t v2 = (data >> 16) & 0xff;
-	uint8_t v3 = (data >> 8) & 0xff;
-	uint8_t v4 = data & 0xff;
-	write(address, v1);
-	write(address + 1, v2);
-	write(address + 2, v3);
-	write(address + 3, v4);
-#endif
+	else if (address == 0x1f801810)
+	{
+		gpu->SendGP0Command(data);
 	}
+	else if (address == 0x1f801814)
+	{
+		gpu->SendGP1Command(data);
+	}
+	else
+	{
+		set_memory_pointers(address);
+		m_word_ptr = reinterpret_cast<uint32_t*>(m_byte_ptr);
+		if (m_word_ptr)
+		{
+			*m_word_ptr = data;
+		}
+	}
+}
 
 void Memory::load_binary_to_bios_area(std::string filename)
 {
@@ -202,4 +372,24 @@ void Memory::load_binary_to_bios_area(std::string filename)
 		file.read((char*)&(this->bios_area[0]), size);
 		file.close();
 	}
+}
+
+void Memory::SetIStatFields(uint32_t toSet)
+{
+	m_io_ports[I_STAT - HARDWARE_REGISTERS_START] |= toSet;
+}
+
+void Memory::DisableIStatFields(uint32_t ToDisable)
+{
+	m_io_ports[I_STAT - HARDWARE_REGISTERS_START] &= ~ToDisable;
+}
+
+uint32_t Memory::GetIStatField()
+{
+	return m_io_ports[I_STAT - HARDWARE_REGISTERS_START];
+}
+
+uint32_t Memory::GetIMaskField()
+{
+	return m_io_ports[I_MASK - HARDWARE_REGISTERS_START];
 }

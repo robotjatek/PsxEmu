@@ -40,10 +40,9 @@ struct JTypeInstruction
 
 class R3000A
 {
-public:
+private:
 	friend class Cop0;
 
-	//Cop0 cop0;
 	ICoprocessor* m_copx[4];
 	Cop0* m_cop0;
 	Memory& m_memory;
@@ -147,6 +146,8 @@ public:
 	inline void Syscall(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Xor(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Xori(uint8_t rt, uint8_t rs, uint16_t imm);
+
+	void HandleIRQReqests();
 
 public:
 	R3000A(Memory& mem);

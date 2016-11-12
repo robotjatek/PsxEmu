@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include "Gpu.h"
+#include "DMA.h"
 
 #define BIOS_START 0x1fc00000
 #define BIOS_END 0x1fc7ffff
@@ -32,6 +34,9 @@
 #define EXPANSION_REGION1_KUSEG_END	0x1F002000
 #define EXPANSION_REGION1_SIZE 0x2000
 
+#define I_STAT 0x1F801070
+#define I_MASK 0x1F801074
+
 class Memory
 {
 private:
@@ -48,6 +53,9 @@ private:
 	uint16_t* m_halfword_ptr;
 	uint32_t* m_word_ptr;
 	inline void set_memory_pointers(uint32_t vaddr);
+
+	Dma* dma;
+	Gpu* gpu;
 public:
 	Memory();
 	~Memory();
@@ -58,5 +66,24 @@ public:
 	void write_halfword(uint32_t address, uint16_t data);
 	void write_word(uint32_t address, uint32_t data);
 	void load_binary_to_bios_area(std::string filename);
+	
+	enum IRQStatFields
+	{
+		VBLANK = 0x1, //bit 0
+		GPU = 0x2, //bit 1
+		CDROM = 0x4, //bit 2
+		DMA = 0x8, //bit 3
+		TMR0 = 0x10, //bit 4
+		TMR1 = 0x20, //bit 5
+		TMR2 = 0x40, //bit 6
+		ControllerAndMemoryCard = 0x80, //bit 7
+		SIO = 0x100, //bit 8
+		SPU = 0x200, //bit 9
+		ControllerLightPen = 0x400, //bit 10 (??? what is lightpen?)
+	};
+	void SetIStatFields(uint32_t toSet);
+	void DisableIStatFields(uint32_t ToDisable);
+	uint32_t GetIStatField();
+	uint32_t GetIMaskField();
 };
 

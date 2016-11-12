@@ -31,6 +31,20 @@ the instruction after a branch, a jump or a load is always executed! Even if the
  Branch and link mindig elmenti a címet az RA regiszterbe, akkor is, ha a feltétel nem teljesül
  --------------------------------------------------------------------------------------------------------
  DIV mûvelet: 36 ciklus, a pipeline nem áll le, az utasításokat folyamatosan végrehajtja továbbra is, majd 36 ciklus után az eredmény a hi és lo regiszterekben
+ ---------------------------------------------------------------------------------------------------------------------------------------
+
+ IRQ jegyzetek:
+
+ IRQ ack szoftveresen van megvalósítva: Az I_stat regiszter (0x1F801070) megfelelõ bitjét az exception handler kinullázza futás után
+ Az I_stat regiszter megfelelõ bitjét be kell billenteni IRQ request estén
+ Ha a bit az I_mask regiszerben maszkolva van, akkor az interrupt nem fut le
+
+ Kérdés: A hardver mit csinál miután az irq flag be lett állítva?
+ Valószínûleg csak simán meghívja az exception handlert IRQ paraméterrel
+
+
+ --------------------------------------------------------------
+ DMA: egy csomó módot támogat a hardver, de úgy néz ki, a játékok csak néhányat használnak
 */
 
 
@@ -39,7 +53,6 @@ the instruction after a branch, a jump or a load is always executed! Even if the
 TODO: a pipelinet lehet hogy emulálni kéne
 */
 
-//TODO: sign extension - negatív offsettel tesztelni az elágazásokat
 
 //TODO: a decodeban az indirekt függvényhívásokat switch-re cserélni
 
