@@ -4,7 +4,7 @@
 
 void R3000A::Step()
 {
-	HandleIRQReqests();
+	HandleIRQRequests();
 	Decode(Fetch());
 }
 
@@ -799,7 +799,7 @@ inline void R3000A::Xori(uint8_t rt, uint8_t rs, uint16_t imm)
 	write_register(rt, read_register(rs) ^ imm);
 }
 
-void R3000A::HandleIRQReqests()
+void R3000A::HandleIRQRequests()
 {
 	static uint32_t PrevIStat = 0; //IStat register is edge triggered, so the exception only occurs on change
 	uint32_t IStat = m_memory.GetIStatField();

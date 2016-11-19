@@ -147,7 +147,7 @@ private:
 	inline void Xor(uint8_t rd, uint8_t rs, uint8_t rt);
 	inline void Xori(uint8_t rt, uint8_t rs, uint16_t imm);
 
-	void HandleIRQReqests();
+	void HandleIRQRequests();
 
 public:
 	R3000A(Memory& mem);
