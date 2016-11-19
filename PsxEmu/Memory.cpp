@@ -362,7 +362,7 @@ void Memory::write_word(uint32_t address, uint32_t data)
 	}
 }
 
-void Memory::load_binary_to_bios_area(std::string filename)
+bool Memory::load_binary_to_bios_area(std::string filename)
 {
 	std::ifstream file(filename, std::ios::in | std::ios::binary | std::ios::ate);
 	if (file.is_open())
@@ -371,7 +371,9 @@ void Memory::load_binary_to_bios_area(std::string filename)
 		file.seekg(0, file.beg);
 		file.read((char*)&(this->bios_area[0]), size);
 		file.close();
+		return true;
 	}
+	return false;
 }
 
 void Memory::SetIStatFields(uint32_t toSet)

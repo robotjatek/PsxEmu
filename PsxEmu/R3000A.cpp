@@ -808,7 +808,7 @@ void R3000A::HandleIRQReqests()
 		uint32_t IMask = m_memory.GetIMaskField();
 		if (IStat & IMask)
 		{
-			uint32_t ret = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Int, this->delay_slot); //??? TODO: sholud i use Int as exceptioncode?
+			uint32_t ret = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Int, this->delay_slot); //??? TODO: use Int as exceptioncode?
 			if (ret != pc)
 			{
 				pc = ret;

@@ -65,7 +65,7 @@ public:
 	void write(uint32_t address, uint8_t data);
 	void write_halfword(uint32_t address, uint16_t data);
 	void write_word(uint32_t address, uint32_t data);
-	void load_binary_to_bios_area(std::string filename);
+	bool load_binary_to_bios_area(std::string filename);
 	
 	enum IRQStatFields
 	{
