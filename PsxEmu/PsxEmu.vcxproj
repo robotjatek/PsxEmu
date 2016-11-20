@@ -111,6 +111,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cop0.cpp" />
+    <ClCompile Include="Disasm.cpp" />
     <ClCompile Include="DMA.cpp" />
     <ClCompile Include="Gpu.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -119,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cop0.h" />
+    <ClInclude Include="Disasm.h" />
     <ClInclude Include="DMA.h" />
     <ClInclude Include="Gpu.h" />
     <ClInclude Include="ICoprocessor.h" />

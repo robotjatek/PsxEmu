@@ -1,11 +1,23 @@
 #include "R3000A.h"
 #include "Cop0.h"
+#include "Memory.h"
 //TODO: sign extend függvény megírása és meghívása minden signed memórahozzáféréshez
 
 void R3000A::Step()
 {
 	HandleIRQRequests();
 	Decode(Fetch());
+}
+
+void R3000A::StartLogging()
+{
+	disasm.Enable();
+}
+
+void R3000A::StopLogging()
+{
+	disasm.Disable();
+	InstructionLogger.close();
 }
 
 inline uint32_t R3000A::Fetch()
@@ -19,13 +31,14 @@ inline uint32_t R3000A::Fetch()
 	pc += 4;
 
 	return ((t4 << 24) | (t3 << 16) | (t2 << 8) | t1);*/
-	uint32_t ret = m_memory.read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
+	uint32_t ret = m_memory->read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
 	pc += 4;
 	return ret;
 }
 
 inline void R3000A::Decode(uint32_t instruction_word)
 {
+
 	delay_slot = false;
 
 	//TODO: execute decoded instruction
@@ -98,7 +111,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		uint8_t copnum = opcode & 0x3;
 		ITypeInstruction i = getITypeFields(instruction_word);
 		int16_t offset = i.immediate;
-		uint32_t w = m_memory.read_word(read_register(i.rs) + offset);
+		uint32_t w = m_memory->read_word(read_register(i.rs) + offset);
 		m_copx[copnum]->LoadWord(w, i.rt);
 	}
 	else if ((opcode & ~0x03) == 0x38)
@@ -107,12 +120,17 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		uint8_t copnum = opcode & 0x3;
 		ITypeInstruction i = getITypeFields(instruction_word);
 		int16_t offset = i.immediate;
-		m_memory.write_word(read_register(i.rs) + offset, m_copx[copnum]->GetWord(i.rt));
+		m_memory->write_word(read_register(i.rs) + offset, m_copx[copnum]->GetWord(i.rt));
 	}
 	else
 	{
 		ITypeInstruction i = getITypeFields(instruction_word);
 		(this->*itypes[i.op])(i.rt, i.rs, i.immediate);
+	}
+
+	if (disasm.IsEnabled())
+	{
+		InstructionLogger << std::hex << pc - 4 <<" "<< disasm.DecodeInstruction(instruction_word) << "\n";
 	}
 
 	//handle delay slot after a branch, load or jump
@@ -185,19 +203,19 @@ inline JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
 
 inline void R3000A::RtypeNull(uint8_t, uint8_t, uint8_t)
 {
-	RTypeInstruction r = getRTypeFields(m_memory.read_word(pc - 4));
+	RTypeInstruction r = getRTypeFields(m_memory->read_word(pc - 4));
 	Null(r.op, r.funct);
 }
 
 inline void R3000A::ItypeNull(uint8_t, uint8_t, uint16_t)
 {
-	ITypeInstruction i = getITypeFields(m_memory.read_word(pc - 4));
+	ITypeInstruction i = getITypeFields(m_memory->read_word(pc - 4));
 	Null(i.op, 0);
 }
 
 inline void R3000A::JtypeNull(uint32_t)
 {
-	JTypeInstruction j = getJTypeFields(m_memory.read_word(pc - 4));
+	JTypeInstruction j = getJTypeFields(m_memory->read_word(pc - 4));
 	Null(j.op, 0);
 }
 
@@ -492,7 +510,7 @@ inline void R3000A::Lb(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	int32_t sign_extended_value = (int8_t)m_memory.read(read_register(base) + signed_offset);
+	int32_t sign_extended_value = (int8_t)m_memory->read(read_register(base) + signed_offset);
 	write_register(rt, sign_extended_value);
 }
 
@@ -500,14 +518,14 @@ inline void R3000A::Lbu(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read(read_register(base) + signed_offset));
+	write_register(rt, m_memory->read(read_register(base) + signed_offset));
 }
 
 inline void R3000A::Lh(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	int32_t sign_extended_value = (int16_t)m_memory.read_halfword(read_register(base) + signed_offset);
+	int32_t sign_extended_value = (int16_t)m_memory->read_halfword(read_register(base) + signed_offset);
 	write_register(rt, sign_extended_value);
 }
 
@@ -515,7 +533,7 @@ inline void R3000A::Lhu(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read_halfword(read_register(base) + signed_offset));
+	write_register(rt, m_memory->read_halfword(read_register(base) + signed_offset));
 }
 
 inline void R3000A::Lui(uint8_t rt, uint8_t, uint16_t imm)
@@ -529,7 +547,7 @@ inline void R3000A::Lw(uint8_t rt, uint8_t base, uint16_t offset)
 	//TODO: address error exception? 
 	//TODO: isolate cache
 	int16_t signed_offset = offset;
-	write_register(rt, m_memory.read_word(read_register(base) + signed_offset));
+	write_register(rt, m_memory->read_word(read_register(base) + signed_offset));
 }
 
 inline void R3000A::Lwcz(uint8_t, uint8_t, uint16_t)
@@ -540,7 +558,7 @@ inline void R3000A::Lwl(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
-	uint32_t t = m_memory.read_halfword(read_register(base) + signed_offset);
+	uint32_t t = m_memory->read_halfword(read_register(base) + signed_offset);
 	w &= 0xFFFF0000;
 	w |= t << 16;
 	write_register(rt, w);
@@ -550,7 +568,7 @@ inline void R3000A::Lwr(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
-	uint32_t t = m_memory.read_halfword(read_register(base) + signed_offset);
+	uint32_t t = m_memory->read_halfword(read_register(base) + signed_offset);
 	w &= 0x0000FFFF;
 	w |= t;
 	write_register(rt, w);
@@ -623,7 +641,7 @@ inline void R3000A::Sb(uint8_t rt, uint8_t base, uint16_t offset)
 	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
 	{
 		int32_t signed_offset = (int16_t)offset;
-		m_memory.write(read_register(base)
+		m_memory->write(read_register(base)
 			+ signed_offset,
 			(uint8_t)read_register(rt));
 	}
@@ -640,7 +658,7 @@ inline void R3000A::Sh(uint8_t rt, uint8_t base, uint16_t offset)
 	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
 	{
 		int16_t signed_offset = offset;
-		m_memory.write_halfword(read_register(base) + signed_offset, (uint16_t)read_register(rt));
+		m_memory->write_halfword(read_register(base) + signed_offset, (uint16_t)read_register(rt));
 	}
 	else
 	{
@@ -740,7 +758,7 @@ inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
 inline void R3000A::Subu(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	uint32_t _rs = read_register(rs);
-	uint32_t _rt =  read_register(rt);
+	uint32_t _rt = read_register(rt);
 	uint32_t result = _rs - _rt;
 	write_register(rd, result);
 }
@@ -751,7 +769,7 @@ inline void R3000A::Sw(uint8_t rt, uint8_t base, uint16_t offset)
 	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
 	{
 		int32_t _offset = (int16_t)offset;
-		m_memory.write_word(read_register(base) + _offset, read_register(rt));
+		m_memory->write_word(read_register(base) + _offset, read_register(rt));
 	}
 	//else
 	{
@@ -770,7 +788,7 @@ inline void R3000A::Swl(uint8_t rt, uint8_t base, uint16_t offset)
 	uint32_t w = read_register(rt);
 	w &= 0xFFFF0000;
 	w = w >> 16;
-	m_memory.write_halfword(read_register(base) + signed_offset, (uint16_t)w);
+	m_memory->write_halfword(read_register(base) + signed_offset, (uint16_t)w);
 }
 
 inline void R3000A::Swr(uint8_t rt, uint8_t base, uint16_t offset)
@@ -778,7 +796,7 @@ inline void R3000A::Swr(uint8_t rt, uint8_t base, uint16_t offset)
 	int16_t signed_offset = offset;
 	uint32_t w = read_register(rt);
 	w &= 0x0000FFFF;
-	m_memory.write_halfword(read_register(base) + signed_offset, (uint16_t)w);
+	m_memory->write_halfword(read_register(base) + signed_offset, (uint16_t)w);
 }
 
 inline void R3000A::Syscall(uint8_t, uint8_t, uint8_t)
@@ -802,10 +820,10 @@ inline void R3000A::Xori(uint8_t rt, uint8_t rs, uint16_t imm)
 void R3000A::HandleIRQRequests()
 {
 	static uint32_t PrevIStat = 0; //IStat register is edge triggered, so the exception only occurs on change
-	uint32_t IStat = m_memory.GetIStatField();
+	uint32_t IStat = m_memory->GetIStatField();
 	if (IStat != PrevIStat)
 	{
-		uint32_t IMask = m_memory.GetIMaskField();
+		uint32_t IMask = m_memory->GetIMaskField();
 		if (IStat & IMask)
 		{
 			uint32_t ret = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Int, this->delay_slot); //??? TODO: use Int as exceptioncode?
@@ -823,8 +841,9 @@ void R3000A::HandleIRQRequests()
 	}
 }
 
-R3000A::R3000A(Memory & mem) : m_memory(mem)
+R3000A::R3000A(Memory* mem)
 {
+	m_memory = mem;
 	this->pc = BIOS_START_UNCACHED; //reset vector - start of the BIOS: 0xbfc00000
 	this->kernel_mode = false;
 	this->exception_pending = false;
@@ -902,6 +921,8 @@ R3000A::R3000A(Memory & mem) : m_memory(mem)
 
 	jtypes[0x02] = &R3000A::J;
 	jtypes[0x03] = &R3000A::Jal;
+
+	InstructionLogger.open("InstructionLog.txt", std::ios::out);
 }
 
 R3000A::~R3000A()
@@ -910,6 +931,7 @@ R3000A::~R3000A()
 	{
 		delete m_copx[i];
 	}
+	InstructionLogger.close();
 }
 
 void R3000A::Run()

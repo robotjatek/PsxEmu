@@ -1,9 +1,12 @@
 #pragma once
-#include "Memory.h"
 #include "Cop0.h"
+#include "Disasm.h"
+#include "ICoprocessor.h"
 #include <cstdint>
 #include <iostream>
-#include "ICoprocessor.h"
+#include <fstream>
+
+class Memory; //Forward declaration
 
 struct Instruction
 {
@@ -45,7 +48,7 @@ private:
 
 	ICoprocessor* m_copx[4];
 	Cop0* m_cop0;
-	Memory& m_memory;
+	Memory* m_memory;
 	uint32_t registers[32];
 	uint32_t hi;
 	uint32_t lo;
@@ -54,6 +57,8 @@ private:
 	bool exception_pending;
 	bool delay_slot;
 	uint32_t delay_slot_address;
+	std::fstream InstructionLogger;
+	Disasm disasm;
 
 	inline uint32_t Fetch();
 	inline void Decode(uint32_t instruction_word);
@@ -150,11 +155,12 @@ private:
 	void HandleIRQRequests();
 
 public:
-	R3000A(Memory& mem);
+	R3000A(Memory* mem);
 	~R3000A();
 	void Run();
-	void  Step();
-
+	void Step();
+	void StartLogging();
+	void StopLogging();
 };
 
 

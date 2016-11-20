@@ -3,6 +3,7 @@
 #include <string>
 #include "Gpu.h"
 #include "DMA.h"
+#include "R3000A.h"
 
 #define BIOS_START 0x1fc00000
 #define BIOS_END 0x1fc7ffff
@@ -56,6 +57,7 @@ private:
 
 	Dma* dma;
 	Gpu* gpu;
+	R3000A* r3000a;
 public:
 	Memory();
 	~Memory();
@@ -85,5 +87,6 @@ public:
 	void DisableIStatFields(uint32_t ToDisable);
 	uint32_t GetIStatField();
 	uint32_t GetIMaskField();
+	R3000A* GetCpu();
 };
 

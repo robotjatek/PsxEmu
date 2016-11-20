@@ -99,6 +99,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	}
 	else if (chc.SyncMode == 2 && chc.StartBusy == 1) //only GPU
 	{
+		pMemory->GetCpu()->StartLogging();
 		printf("Syncmode 2 on channel %d started\n", channelNum);
 		log << "Syncmode 2 channel " << channelNum << "\n";
 		if (chc.TransferDirection == 1)//from main ram

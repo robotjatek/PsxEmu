@@ -109,6 +109,7 @@ void Memory::set_memory_pointers(uint32_t vaddr)
 	else
 	{
 		//printf("err addr: %08x\n",vaddr);
+		r3000a->StopLogging();
 		m_byte_ptr = nullptr;
 	}
 }
@@ -130,6 +131,15 @@ Memory::Memory()
 	m_expansion_area1 = new uint8_t[EXPANSION_REGION1_SIZE];
 	gpu = new Gpu;
 	dma = new Dma(this);
+	r3000a = new R3000A(this);
+	if (load_binary_to_bios_area("SCPH1001.BIN"))
+	{
+		r3000a->Run();
+	}
+	else
+	{
+		std::cout << "Failed to load BIOS image\n";
+	}
 }
 
 
@@ -341,6 +351,7 @@ void Memory::write_word(uint32_t address, uint32_t data)
 	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
 		//DMA
+		//r3000a->StartLogging();
 		dma->WriteToDMARegister(address, data);
 	}
 	else if (address == 0x1f801810)
@@ -394,4 +405,9 @@ uint32_t Memory::GetIStatField()
 uint32_t Memory::GetIMaskField()
 {
 	return m_io_ports[I_MASK - HARDWARE_REGISTERS_START];
+}
+
+R3000A * Memory::GetCpu()
+{
+	return r3000a;
 }

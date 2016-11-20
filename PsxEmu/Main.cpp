@@ -63,15 +63,7 @@ TODO: a pipelinet lehet hogy emulálni kéne
 int main()
 {
 	Memory memory;
-	if (memory.load_binary_to_bios_area("SCPH1001.BIN"))
-	{
-		R3000A r3000(memory);
-		r3000.Run();
-	}
-	else
-	{
-		std::cout << "Failed to load BIOS image\n";
-	}
+	
 	system("pause");
 	return 0;
 }
