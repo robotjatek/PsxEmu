@@ -31,7 +31,7 @@ inline uint32_t R3000A::Fetch()
 	pc += 4;
 
 	return ((t4 << 24) | (t3 << 16) | (t2 << 8) | t1);*/
-//	uint32_t ret = m_memory->read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
+	//	uint32_t ret = m_memory->read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
 	uint32_t ret = m_memory->Read<uint32_t>(pc);
 	pc += 4;
 	return ret;
@@ -138,11 +138,11 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		(this->*itypes[i.op])(i.rt, i.rs, i.immediate);
 	}
 
-	
+
 	instruction_counter++;
 	if (instruction_counter == 100000)
 	{
-	//	printf("adas");
+		//	printf("adas");
 	}
 
 	//handle delay slot after a branch, load or jump
@@ -696,14 +696,7 @@ inline void R3000A::Slt(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	int32_t _rs = read_register(rs);
 	int32_t _rt = read_register(rt);
-	if (_rs < _rt)
-	{
-		write_register(rd, 1);
-	}
-	else
-	{
-		write_register(rd, 0);
-	}
+	write_register(rd, _rs < _rt);
 }
 
 inline void R3000A::Slti(uint8_t rt, uint8_t rs, uint16_t imm)
@@ -722,14 +715,7 @@ inline void R3000A::Sltu(uint8_t rd, uint8_t rs, uint8_t rt)
 {
 	uint32_t _rs = read_register(rs);
 	uint32_t _rt = read_register(rt);
-	if (_rs < _rt)
-	{
-		write_register(rd, 1);
-	}
-	else
-	{
-		write_register(rd, 0);
-	}
+	write_register(rd, _rs < _rt);
 }
 
 inline void R3000A::Sra(uint8_t rd, uint8_t rs, uint8_t rt)
