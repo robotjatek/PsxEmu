@@ -209,7 +209,7 @@ std::string Disasm::BLEZ(uint32_t Instruction) { return "BLEZ " + BranchFields(I
 std::string Disasm::BLTZ(uint32_t Instruction) { return "BLZT " + BranchFields(Instruction); };
 std::string Disasm::BLTZAL(uint32_t Instruction) { return "BLZTAL " + BranchFields(Instruction); };
 std::string Disasm::BNE(uint32_t Instruction) { return "BNE " + BEQBNEFields(Instruction); };
-std::string Disasm::BREAK(uint32_t Instruction) { return "BREAK"; };
+std::string Disasm::BREAK(uint32_t) { return "BREAK"; };
 std::string Disasm::CFCz(uint32_t Instruction) { return "CFCz"; };
 std::string Disasm::COPz(uint32_t Instruction) { return "COPz"; };
 std::string Disasm::CTCz(uint32_t Instruction) { return "CTCz"; };
@@ -239,7 +239,7 @@ std::string Disasm::MULTU(uint32_t Instruction) { return "MULTU"; };
 std::string Disasm::NOR(uint32_t Instruction) { return "NOR " + RtypeFields(Instruction); };
 std::string Disasm::OR(uint32_t Instruction) { return "OR " + RtypeFields(Instruction); };
 std::string Disasm::ORI(uint32_t Instruction) { return "ORI " + ItypeFields(Instruction); };
-std::string Disasm::RFE(uint32_t Instruction) { return "RFE"; };
+std::string Disasm::RFE(uint32_t) { return "RFE"; };
 std::string Disasm::SB(uint32_t Instruction) { return "SB " + LoadStoreFields(Instruction); };
 std::string Disasm::SH(uint32_t Instruction) { return "SH " + LoadStoreFields(Instruction); };
 std::string Disasm::SLL(uint32_t Instruction) { return "SLL " + ShiftFields(Instruction); };
