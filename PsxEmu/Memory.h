@@ -204,22 +204,22 @@ inline TYPE Memory::Read(uint32_t address)
 	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
 		//DMA
-		return dma->ReadFromDMARegister(address);
+		return (TYPE)dma->ReadFromDMARegister(address);
 	}
 	else if (address == 0x1f801810)
 	{
-		return gpu->GetGPURead();
+		return (TYPE)gpu->GetGPURead();
 	}
 	else if (address == 0x1f801814)
 	{
-		return gpu->GetGPUStatus();
+		return (TYPE)gpu->GetGPUStatus();
 	}
 	else
 	{
 		TYPE* ptr = SetMemoryPointer<TYPE>(address);
 		if (ptr)
 		{
-			return *ptr;
+			return (TYPE)(*ptr);
 		}
 		else
 		{
