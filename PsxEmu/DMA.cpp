@@ -202,8 +202,6 @@ uint32_t Dma::GetToDeviceAddress(uint8_t ChannelNumber)
 		return 0;
 		break;
 	}
-
-	return 0;
 }
 
 Dma::Dma(Memory* memory)
