@@ -36,6 +36,8 @@ private:
 	std::string JumpField(uint32_t Instruction);
 	std::string JALRFields(uint32_t Instruction);
 	std::string LoadStoreFields(uint32_t Instruction);
+	std::string ShiftFields(uint32_t Instruction);
+	std::string LUIFields(uint32_t Instruction);
 	std::string DecodeRtype(uint32_t Instruction);
 	std::string DecodeRegImm(uint32_t Instruction);
 	std::string DecodeCop(uint32_t Instruction);

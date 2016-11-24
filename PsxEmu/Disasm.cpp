@@ -125,6 +125,31 @@ std::string Disasm::LoadStoreFields(uint32_t Instruction)
 	return retval.str();
 }
 
+std::string Disasm::ShiftFields(uint32_t Instruction)
+{
+	R3000A* Cpu = pMemory->GetCpu();
+	RTypeInstruction ri = Cpu->getRTypeFields(Instruction);
+	std::stringstream retval;
+	retval
+		<< RegisterNames[ri.rd] << " (" << std::hex << Cpu->read_register(ri.rd) << "), "
+		<< RegisterNames[ri.rt] << " (" << std::hex << Cpu->read_register(ri.rt) << "), "
+		<< (uint32_t)ri.sht;
+
+	return retval.str();
+}
+
+std::string Disasm::LUIFields(uint32_t Instruction)
+{
+	R3000A* Cpu = pMemory->GetCpu();
+	ITypeInstruction ii = Cpu->getITypeFields(Instruction);
+	std::stringstream retval;
+	retval
+		<< RegisterNames[ii.rt] << " (" << std::hex << Cpu->read_register(ii.rt) << "), "
+		<< std::hex << ii.immediate;
+
+	return retval.str();
+}
+
 std::string Disasm::DecodeRtype(uint32_t Instruction)
 {
 	uint8_t Funct = Instruction & 0x3f;
@@ -198,7 +223,7 @@ std::string Disasm::LB(uint32_t Instruction) { return "LB " + LoadStoreFields(In
 std::string Disasm::LBU(uint32_t Instruction) { return "LBU " + LoadStoreFields(Instruction); };
 std::string Disasm::LH(uint32_t Instruction) { return "LH " + LoadStoreFields(Instruction); };
 std::string Disasm::LHU(uint32_t Instruction) { return "LHU " + LoadStoreFields(Instruction); };
-std::string Disasm::LUI(uint32_t Instruction) { return "LUI"; };
+std::string Disasm::LUI(uint32_t Instruction) { return "LUI " + LUIFields(Instruction); };
 std::string Disasm::LW(uint32_t Instruction) { return "LW " + LoadStoreFields(Instruction); };
 std::string Disasm::LWCz(uint32_t Instruction) { return "LWCz " + LoadStoreFields(Instruction); };
 std::string Disasm::LWL(uint32_t Instruction) { return "LWL " + LoadStoreFields(Instruction); };
@@ -217,15 +242,15 @@ std::string Disasm::ORI(uint32_t Instruction) { return "ORI " + ItypeFields(Inst
 std::string Disasm::RFE(uint32_t Instruction) { return "RFE"; };
 std::string Disasm::SB(uint32_t Instruction) { return "SB " + LoadStoreFields(Instruction); };
 std::string Disasm::SH(uint32_t Instruction) { return "SH " + LoadStoreFields(Instruction); };
-std::string Disasm::SLL(uint32_t Instruction) { return "SLL "; };
+std::string Disasm::SLL(uint32_t Instruction) { return "SLL " + ShiftFields(Instruction); };
 std::string Disasm::SLLV(uint32_t Instruction) { return "SLLV " + RtypeFields(Instruction); };
 std::string Disasm::SLT(uint32_t Instruction) { return "SLT " + RtypeFields(Instruction); };
 std::string Disasm::SLTI(uint32_t Instruction) { return "SLTI " + ItypeFields(Instruction); };
 std::string Disasm::SLTIU(uint32_t Instruction) { return "SLTIU " + ItypeFields(Instruction); };
 std::string Disasm::SLTU(uint32_t Instruction) { return "SLTU " + RtypeFields(Instruction); };
-std::string Disasm::SRA(uint32_t Instruction) { return "SRA"; };
+std::string Disasm::SRA(uint32_t Instruction) { return "SRA" + ShiftFields(Instruction); };
 std::string Disasm::SRAV(uint32_t Instruction) { return "SRAV " + RtypeFields(Instruction); };
-std::string Disasm::SRL(uint32_t Instruction) { return "SRL"; };
+std::string Disasm::SRL(uint32_t Instruction) { return "SRL " + ShiftFields(Instruction); };
 std::string Disasm::SRLV(uint32_t Instruction) { return "SRLV " + RtypeFields(Instruction); };
 std::string Disasm::SUB(uint32_t Instruction) { return "SUB " + RtypeFields(Instruction); };
 std::string Disasm::SUBU(uint32_t Instruction) { return "SUBU " + RtypeFields(Instruction); };

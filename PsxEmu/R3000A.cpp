@@ -41,9 +41,9 @@ inline void R3000A::Decode(uint32_t instruction_word)
 {
 
 	delay_slot = false;
-	if (pc == 0x80050204)
+	if (pc == 0x80050ea8)
 	{
-		disasm->Enable();
+		StartLogging();
 	}
 	if (disasm->IsEnabled())
 	{

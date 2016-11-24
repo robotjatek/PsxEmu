@@ -93,6 +93,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	uint8_t* ptr = nullptr;
 	if (vaddr == 0x8007929c)
 	{
+		//r3000a->StartLogging();
 		printf("asd");
 	}
 	if ((vaddr >= BIOS_START_UNCACHED && vaddr <= BIOS_END_UNCACHED))
