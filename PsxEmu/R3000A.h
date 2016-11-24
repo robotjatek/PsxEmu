@@ -44,7 +44,7 @@ struct JTypeInstruction
 class R3000A
 {
 private:
-	friend class Cop0;
+	friend class Disasm;
 
 	ICoprocessor* m_copx[4];
 	Cop0* m_cop0;
@@ -58,7 +58,8 @@ private:
 	bool delay_slot;
 	uint32_t delay_slot_address;
 	std::fstream InstructionLogger;
-	Disasm disasm;
+	Disasm* disasm;
+	uint32_t instruction_counter;
 
 	inline uint32_t Fetch();
 	inline void Decode(uint32_t instruction_word);

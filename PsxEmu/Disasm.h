@@ -1,105 +1,122 @@
 #pragma once
 #include <cstdint>
+#include <string>
+
+class Memory;
 
 class Disasm
 {
 public:
-	Disasm();
+	Disasm(Memory* pMemory);
 	virtual ~Disasm();
-	const char* DecodeInstruction(uint32_t Instruction);
+	std::string DecodeInstruction(uint32_t Instruction);
 	void Enable();
 	void Disable();
 	bool IsEnabled();
 
 private:
 	bool Enabled;
+	Memory* pMemory;
 
-	typedef const char* (Disasm::*OpcodeTable)(uint32_t Instruction);
-	typedef const char* (Disasm::*RtypeTable)(uint32_t Instruction);
-	typedef const char* (Disasm::*RegImmTable)(uint32_t Instruction);
+	typedef std::string (Disasm::*OpcodeTable)(uint32_t Instruction);
+	typedef std::string (Disasm::*RtypeTable)(uint32_t Instruction);
+	typedef std::string (Disasm::*RegImmTable)(uint32_t Instruction);
+
+	const std::string RegisterNames[32] = {
+		"$zero", "$at", "$v0", "$v1", "$a0", "$a1",	"$a2", "$a3",
+		"$t0", "$t1", "$t2", "$t3",	"$t4", "$t4", "$t6", "$t7",
+		"$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7",
+		"$t8", "$t9", "$k0", "$k1", "$gp", "$sp", "$fp", "$ra"
+	};
 	
-	const char* DecodeRtype(uint32_t Instruction);
-	const char* DecodeRegImm(uint32_t Instruction);
-	const char* DecodeCop(uint32_t Instruction);
-	const char* CpuNull(uint32_t Instruction) { return "Unknown opcode: " + Instruction; };
+	std::string RtypeFields(uint32_t Instruction);
+	std::string ItypeFields(uint32_t Instruction);
+	std::string BEQBNEFields(uint32_t Instruction);
+	std::string BranchFields(uint32_t Instruction);
+	std::string JumpField(uint32_t Instruction);
+	std::string JALRFields(uint32_t Instruction);
+	std::string LoadStoreFields(uint32_t Instruction);
+	std::string DecodeRtype(uint32_t Instruction);
+	std::string DecodeRegImm(uint32_t Instruction);
+	std::string DecodeCop(uint32_t Instruction);
+	std::string CpuNull(uint32_t Instruction) { return "Unknown opcode: " + Instruction; };
 
-	const char* ADD(uint32_t Instruction) { return "ADD"; };
-	const char* ADDI(uint32_t Instruction) { return "ADDI"; };
-	const char* ADDIU(uint32_t Instruction) { return "ADDIU"; };
-	const char* ADDU(uint32_t Instruction) { return "ADDU"; };
-	const char* AND(uint32_t Instruction) { return "AND"; };
-	const char* ANDI(uint32_t Instruction) { return "ANDI"; };
-	const char* BEQ(uint32_t Instruction) { return "BEQ"; };
-	const char* BGEZ(uint32_t Instruction) { return "BGEZ"; };
-	const char* BGEZAL(uint32_t Instruction) { return "BGEZAL"; };
-	const char* BGTZ(uint32_t Instruction) { return "BGTZ"; };
-	const char* BLEZ(uint32_t Instruction) { return "BLEZ"; };
-	const char* BLTZ(uint32_t Instruction) { return "BLZT"; };
-	const char* BLTZAL(uint32_t Instruction) { return "BLZTAL"; };
-	const char* BNE(uint32_t Instruction) { return "BNE"; };
-	const char* BREAK(uint32_t Instruction) { return "BREAK"; };
-	const char* CFCz(uint32_t Instruction) { return "CFCz"; };
-	const char* COPz(uint32_t Instruction) { return "COPz"; };
-	const char* CTCz(uint32_t Instruction) { return "CTCz"; };
-	const char* DIV(uint32_t Instruction) { return "DIV"; };
-	const char* DIVU(uint32_t Instruction) { return "DIVU"; };
-	const char* J(uint32_t Instruction) { return "J"; };
-	const char* JAL(uint32_t Instruction) { return "JAL"; };
-	const char* JALR(uint32_t Instruction) { return "JALR"; };
-	const char* JR(uint32_t Instruction) { return "JR"; };
-	const char* LB(uint32_t Instruction) { return "LB"; };
-	const char* LBU(uint32_t Instruction) { return "LBU"; };
-	const char* LH(uint32_t Instruction) { return "LH"; };
-	const char* LHU(uint32_t Instruction) { return "LHU"; };
-	const char* LUI(uint32_t Instruction) { return "LUI"; };
-	const char* LW(uint32_t Instruction) { return "LW"; };
-	const char* LWCz(uint32_t Instruction) { return "LWCz"; };
-	const char* LWL(uint32_t Instruction) { return "LWL"; };
-	const char* LWR(uint32_t Instruction) { return "LWR"; };
-	const char* MFCz(uint32_t Instruction) { return "MFCz"; };
-	const char* MFHI(uint32_t Instruction) { return "MFHI"; };
-	const char* MFLO(uint32_t Instruction) { return "MFLO"; };
-	const char* MTCz(uint32_t Instruction) { return "MTCz"; };
-	const char* MTHI(uint32_t Instruction) { return "MTHI"; };
-	const char* MTLO(uint32_t Instruction) { return "MTLO"; };
-	const char* MULT(uint32_t Instruction) { return "MULT"; };
-	const char* MULTU(uint32_t Instruction) { return "MULTU"; };
-	const char* NOR(uint32_t Instruction) { return "NOR"; };
-	const char* OR(uint32_t Instruction) { return "OR"; };
-	const char* ORI(uint32_t Instruction) { return "ORI"; };
-	const char* RFE(uint32_t Instruction) { return "RFE"; };
-	const char* SB(uint32_t Instruction) { return "SB"; };
-	const char* SH(uint32_t Instruction) { return "SH"; };
-	const char* SLL(uint32_t Instruction) { return "SLL"; };
-	const char* SLLV(uint32_t Instruction) { return "SLLV"; };
-	const char* SLT(uint32_t Instruction) { return "SLT"; };
-	const char* SLTI(uint32_t Instruction) { return "SLTI"; };
-	const char* SLTIU(uint32_t Instruction) { return "SLTIU"; };
-	const char* SLTU(uint32_t Instruction) { return "SLTU"; };
-	const char* SRA(uint32_t Instruction) { return "SRA"; };
-	const char* SRAV(uint32_t Instruction) { return "SRAV"; };
-	const char* SRL(uint32_t Instruction) { return "SRL"; };
-	const char* SRLV(uint32_t Instruction) { return "SRLV"; };
-	const char* SUB(uint32_t Instruction) { return "SUB"; };
-	const char* SUBU(uint32_t Instruction) { return "SUBU"; };
-	const char* SW(uint32_t Instruction) { return "SW"; };
-	const char* SWCz(uint32_t Instruction) { return "SWCz"; };
-	const char* SWL(uint32_t Instruction) { return "SWL"; };
-	const char* SWR(uint32_t Instruction) { return "SWR"; };
-	const char* SYSCALL(uint32_t Instruction) { return "SYSCALL"; };
-	const char* XOR(uint32_t Instruction) { return "XOR"; };
-	const char* XORI(uint32_t Instruction) { return "XORI"; };
-	const char* ToBeImplemented(uint32_t Instruction) { return "ASD"; };
+	std::string ADD(uint32_t Instruction);
+	std::string ADDI(uint32_t Instruction);
+	std::string ADDIU(uint32_t Instruction);
+	std::string ADDU(uint32_t Instruction);
+	std::string AND(uint32_t Instruction);
+	std::string ANDI(uint32_t Instruction);
+	std::string BEQ(uint32_t Instruction);
+	std::string BGEZ(uint32_t Instruction);
+	std::string BGEZAL(uint32_t Instruction);
+	std::string BGTZ(uint32_t Instruction);
+	std::string BLEZ(uint32_t Instruction);
+	std::string BLTZ(uint32_t Instruction);
+	std::string BLTZAL(uint32_t Instruction);
+	std::string BNE(uint32_t Instruction);
+	std::string BREAK(uint32_t Instruction);
+	std::string CFCz(uint32_t Instruction);
+	std::string COPz(uint32_t Instruction);
+	std::string CTCz(uint32_t Instruction);
+	std::string DIV(uint32_t Instruction);
+	std::string DIVU(uint32_t Instruction);
+	std::string J(uint32_t Instruction);
+	std::string JAL(uint32_t Instruction);
+	std::string JALR(uint32_t Instruction);
+	std::string JR(uint32_t Instruction);
+	std::string LB(uint32_t Instruction);
+	std::string LBU(uint32_t Instruction);
+	std::string LH(uint32_t Instruction);
+	std::string LHU(uint32_t Instruction);
+	std::string LUI(uint32_t Instruction);
+	std::string LW(uint32_t Instruction);
+	std::string LWCz(uint32_t Instruction);
+	std::string LWL(uint32_t Instruction);
+	std::string LWR(uint32_t Instruction);
+	std::string MFCz(uint32_t Instruction);
+	std::string MFHI(uint32_t Instruction);
+	std::string MFLO(uint32_t Instruction);
+	std::string MTCz(uint32_t Instruction);
+	std::string MTHI(uint32_t Instruction);
+	std::string MTLO(uint32_t Instruction);
+	std::string MULT(uint32_t Instruction);
+	std::string MULTU(uint32_t Instruction);
+	std::string NOR(uint32_t Instruction);
+	std::string OR(uint32_t Instruction);
+	std::string ORI(uint32_t Instruction);
+	std::string RFE(uint32_t Instruction);
+	std::string SB(uint32_t Instruction);
+	std::string SH(uint32_t Instruction);
+	std::string SLL(uint32_t Instruction);
+	std::string SLLV(uint32_t Instruction);
+	std::string SLT(uint32_t Instruction);
+	std::string SLTI(uint32_t Instruction);
+	std::string SLTIU(uint32_t Instruction);
+	std::string SLTU(uint32_t Instruction);
+	std::string SRA(uint32_t Instruction);
+	std::string SRAV(uint32_t Instruction);
+	std::string SRL(uint32_t Instruction);
+	std::string SRLV(uint32_t Instruction);
+	std::string SUB(uint32_t Instruction);
+	std::string SUBU(uint32_t Instruction);
+	std::string SW(uint32_t Instruction);
+	std::string SWCz(uint32_t Instruction);
+	std::string SWL(uint32_t Instruction);
+	std::string SWR(uint32_t Instruction);
+	std::string SYSCALL(uint32_t Instruction);
+	std::string XOR(uint32_t Instruction);
+	std::string XORI(uint32_t Instruction);
 
 
-	RegImmTable RegImmPtr[18] = {
+	const RegImmTable RegImmPtr[18] = {
 		&Disasm::BLTZ, &Disasm::BGEZ, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		&Disasm::BLTZAL, &Disasm::BGEZAL
 	};
 
-	RtypeTable RtypePtr[64] = {
-		&Disasm::SLL, &Disasm::ToBeImplemented, &Disasm::SRL, &Disasm::SRA, &Disasm::SLLV, nullptr, &Disasm::SRLV, &Disasm::SRAV,
+	const RtypeTable RtypePtr[64] = {
+		&Disasm::SLL, nullptr, &Disasm::SRL, &Disasm::SRA, &Disasm::SLLV, nullptr, &Disasm::SRLV, &Disasm::SRAV,
 		&Disasm::JR, &Disasm::JALR, nullptr, nullptr, &Disasm::SYSCALL, &Disasm::BREAK, nullptr, nullptr,
 		&Disasm::MFHI, &Disasm::MTHI, &Disasm::MFLO, &Disasm::MTLO, nullptr, nullptr, nullptr, nullptr,
 		&Disasm::MULT, &Disasm::MULTU, &Disasm::DIV, &Disasm::DIVU, nullptr, nullptr, nullptr, nullptr,
@@ -109,7 +126,7 @@ private:
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
 	};
 
-	OpcodeTable OpcodePtr[64] = {
+	const OpcodeTable OpcodePtr[64] = {
 		&Disasm::DecodeRtype, &Disasm::DecodeRegImm, &Disasm::J, &Disasm::JAL, &Disasm::BEQ, &Disasm::BNE, &Disasm::BLEZ, &Disasm::BGTZ,
 		&Disasm::ADDI, &Disasm::ADDIU, &Disasm::SLTI, &Disasm::SLTIU, &Disasm::ANDI, &Disasm::ORI, &Disasm::XORI, &Disasm::LUI,
 		&Disasm::DecodeCop, &Disasm::DecodeCop, &Disasm::DecodeCop, &Disasm::DecodeCop, nullptr, nullptr, nullptr, nullptr,

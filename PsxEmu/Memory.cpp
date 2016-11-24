@@ -11,8 +11,13 @@ inline uint32_t Memory::transform_virtual_address_to_physical(uint32_t vaddr)
 	return vaddr & (~0xE0000000);
 }
 
+/*
 void Memory::set_memory_pointers(uint32_t vaddr)
 {
+	if (vaddr == 0x8007929c)
+	{
+		printf("asd");
+	}
 	if ((vaddr >= BIOS_START_UNCACHED && vaddr <= BIOS_END_UNCACHED))
 	{
 		m_byte_ptr = &(bios_area[vaddr - BIOS_START_UNCACHED]);
@@ -108,11 +113,12 @@ void Memory::set_memory_pointers(uint32_t vaddr)
 	}
 	else
 	{
-		//printf("err addr: %08x\n",vaddr);
-		r3000a->StopLogging();
+		printf("err addr: %08x\n",vaddr);
+		//r3000a->StopLogging();
 		m_byte_ptr = nullptr;
 	}
 }
+*/
 
 Memory::Memory()
 {
@@ -122,10 +128,10 @@ Memory::Memory()
 	m_scratch_pad = new uint8_t[SCRATCH_PAD_SIZE];
 	m_io_ports = new uint8_t[HARDWARE_REGISTERS_SIZE];
 	memset(&m_io_ports[0], 0, HARDWARE_REGISTERS_SIZE);
-	set_memory_pointers(0x1f801000);
-	m_word_ptr = reinterpret_cast<uint32_t*>(m_byte_ptr);
-	m_word_ptr[0] = 0x1f000000;
-	m_word_ptr[1] = 0x1f802000;
+	//set_memory_pointers(0x1f801000);
+	uint32_t* ptr = SetMemoryPointer<uint32_t>(0x1f801000);
+	ptr[0] = 0x1f000000;
+	ptr[1] = 0x1f802000;
 	bios_area = new uint8_t[BIOS_SIZE];
 	memset(&bios_area[0], 0, sizeof(bios_area));
 	m_expansion_area1 = new uint8_t[EXPANSION_REGION1_SIZE];
@@ -157,7 +163,7 @@ Memory::~Memory()
 
 //"The RAM is arranged so that the addresses at 0x00xxxxxx, 0xA0xxxxxx, 0x80xxxxxx all point to the same physical memory."
 
-
+/*
 uint8_t Memory::read(uint32_t address)
 {
 	if (address >= 0x1F801080 && address <= 0x1F8010FC)
@@ -272,7 +278,8 @@ uint32_t Memory::read_word(uint32_t address)
 	}
 //	return 0;
 }
-
+*/
+/*
 void Memory::write(uint32_t address, uint8_t data)
 {
 	if (address >= 0x1F801080 && address <= 0x1F8010FC)
@@ -372,7 +379,7 @@ void Memory::write_word(uint32_t address, uint32_t data)
 		}
 	}
 }
-
+*/
 bool Memory::load_binary_to_bios_area(std::string filename)
 {
 	std::ifstream file(filename, std::ios::in | std::ios::binary | std::ios::ate);
