@@ -49,12 +49,6 @@ private:
 	uint8_t seg2[4];
 	uint8_t* m_expansion_area1;
 	inline uint32_t transform_virtual_address_to_physical(uint32_t vaddr);
-
-	//uint8_t* m_byte_ptr;
-	//uint16_t* m_halfword_ptr;
-	//uint32_t* m_word_ptr;
-	//inline void set_memory_pointers(uint32_t vaddr);
-
 	template <class TYPE>
 	TYPE* SetMemoryPointer(uint32_t vaddr);
 
@@ -64,12 +58,6 @@ private:
 public:
 	Memory();
 	~Memory();
-	//uint8_t read(uint32_t address);
-	//uint16_t read_halfword(uint32_t address);
-	//uint32_t read_word(uint32_t address);
-	//void write(uint32_t address, uint8_t data);
-	//void write_halfword(uint32_t address, uint16_t data);
-	//void write_word(uint32_t address, uint32_t data);
 	bool load_binary_to_bios_area(std::string filename);
 
 	template <class TYPE>
