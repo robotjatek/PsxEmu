@@ -203,7 +203,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	else
 	{
 		printf("err addr: %08x\n", vaddr);
-		//r3000a->StopLogging();
+		r3000a->StopLogging();
 		ptr = nullptr;
 	}
 
