@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <fstream>
 #include "Gpu.h"
 #include "DMA.h"
 #include "R3000A.h"
@@ -51,6 +52,8 @@ private:
 	inline uint32_t transform_virtual_address_to_physical(uint32_t vaddr);
 	template <class TYPE>
 	TYPE* SetMemoryPointer(uint32_t vaddr);
+	void DumpMemoryHex(std::fstream& Stream);
+	void DumpMemoryASCII(std::fstream& Stream);
 
 	Dma* dma;
 	Gpu* gpu;
@@ -84,6 +87,7 @@ public:
 	uint32_t GetIStatField();
 	uint32_t GetIMaskField();
 	R3000A* GetCpu();
+	void DumpMemory();
 };
 
 
@@ -94,7 +98,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	if (vaddr == 0x8007929c)
 	{
 		//r3000a->StartLogging();
-		printf("asd");
+		//printf("asd");
 	}
 	if ((vaddr >= BIOS_START_UNCACHED && vaddr <= BIOS_END_UNCACHED))
 	{
@@ -193,6 +197,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	{
 		printf("err addr: %08x\n", vaddr);
 		r3000a->StopLogging();
+		DumpMemory();
 		ptr = nullptr;
 	}
 
