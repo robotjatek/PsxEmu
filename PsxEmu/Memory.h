@@ -49,7 +49,7 @@ private:
 	uint8_t* bios_area; //512k
 	uint8_t seg2[4];
 	uint8_t* m_expansion_area1;
-	inline uint32_t transform_virtual_address_to_physical(uint32_t vaddr);
+	uint32_t transform_virtual_address_to_physical(uint32_t vaddr);
 	template <class TYPE>
 	TYPE* SetMemoryPointer(uint32_t vaddr);
 	void DumpMemoryHex(std::fstream& Stream);

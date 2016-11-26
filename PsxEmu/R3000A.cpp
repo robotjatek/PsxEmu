@@ -171,7 +171,7 @@ inline void R3000A::write_register(uint8_t reg, uint32_t data)
 	}
 }
 
-inline uint32_t R3000A::read_register(uint8_t reg)
+uint32_t R3000A::read_register(uint8_t reg)
 {
 	reg &= 0x1F;
 	if (reg == 0)
@@ -184,7 +184,7 @@ inline uint32_t R3000A::read_register(uint8_t reg)
 	}
 }
 
-inline struct RTypeInstruction R3000A::getRTypeFields(uint32_t opcode)
+struct RTypeInstruction R3000A::getRTypeFields(uint32_t opcode)
 {
 	struct RTypeInstruction ret;
 	ret.op = (opcode & 0xFC000000) >> 26;
@@ -196,7 +196,7 @@ inline struct RTypeInstruction R3000A::getRTypeFields(uint32_t opcode)
 	return ret;
 }
 
-inline ITypeInstruction R3000A::getITypeFields(uint32_t opcode)
+struct ITypeInstruction R3000A::getITypeFields(uint32_t opcode)
 {
 	struct ITypeInstruction ret;
 	ret.op = (opcode & 0xFC000000) >> 26;
@@ -206,7 +206,7 @@ inline ITypeInstruction R3000A::getITypeFields(uint32_t opcode)
 	return ret;
 }
 
-inline JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
+struct JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
 {
 	struct JTypeInstruction ret;
 	ret.op = (opcode & 0xFC000000) >> 26;

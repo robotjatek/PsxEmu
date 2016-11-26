@@ -1,5 +1,6 @@
 #include "Disasm.h"
 #include "Memory.h"
+#include "R3000A.h"
 #include <sstream>
 
 

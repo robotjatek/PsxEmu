@@ -6,7 +6,7 @@
 The cache hit ratio is 95%, so most code run at full speed.*/
 
 
-inline uint32_t Memory::transform_virtual_address_to_physical(uint32_t vaddr)
+uint32_t Memory::transform_virtual_address_to_physical(uint32_t vaddr)
 {
 	return vaddr & (~0xE0000000);
 }
