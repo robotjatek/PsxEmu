@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Memory.h"
 #include "R3000A.h"
-//#include <vld.h>
+#include <vld.h>
 
 /*
 NOTES
@@ -63,6 +63,7 @@ TODO: a pipelinet lehet hogy emulálni kéne
 int main()
 {
 	Memory memory;
+	memory.RunSystem();
 	
 	system("pause");
 	return 0;

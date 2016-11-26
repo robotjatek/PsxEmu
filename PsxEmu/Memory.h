@@ -19,7 +19,7 @@
 #define CACHED_MIRROR_END 0x801fffff
 #define UNCACHED_MIRROR_START 0xa0000000
 #define UNCACHED_MIRROR_END 0xa01fffff
-#define MEMORY_SIZE 0x1FFFFF //2MB
+#define MEMORY_SIZE 0x200000 //2MB
 #define PARALLEL_PORT_SIZE 0x10000 //64k
 #define PARALLEL_PORT_START 0x1f000000
 #define PARALLEL_PORT_END 0x1f00ffff
@@ -88,6 +88,7 @@ public:
 	uint32_t GetIMaskField();
 	R3000A* GetCpu();
 	void DumpMemory();
+	void RunSystem();
 };
 
 
@@ -197,12 +198,20 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	{
 		printf("err addr: %08x\n", vaddr);
 		r3000a->StopLogging();
-		DumpMemory();
+		r3000a->Stop();
+		//DumpMemory();
 		ptr = nullptr;
-		exit(-1);
+		//exit(-1);
 	}
 
-	return reinterpret_cast<TYPE*>(ptr);
+	if(ptr)
+	{
+		return reinterpret_cast<TYPE*>(ptr);
+	}
+	else
+	{
+		return nullptr; //nullptr cannot be converted with reinterpret cast
+	}
 }
 
 template<class TYPE>

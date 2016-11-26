@@ -57,14 +57,13 @@ Memory::Memory()
 	gpu = new Gpu;
 	dma = new Dma(this);
 	r3000a = new R3000A(this);
-	if (load_binary_to_bios_area("SCPH1001.BIN"))
-	{
-		r3000a->Run();
-	}
-	else
+	if (!load_binary_to_bios_area("SCPH1001.BIN"))
 	{
 		std::cout << "Failed to load BIOS image\n";
 	}
+
+
+	DumpMemory();
 }
 
 
@@ -78,6 +77,7 @@ Memory::~Memory()
 	delete[] m_expansion_area1;
 	delete dma;
 	delete gpu;
+	delete r3000a;
 }
 
 //"The RAM is arranged so that the addresses at 0x00xxxxxx, 0xA0xxxxxx, 0x80xxxxxx all point to the same physical memory."
@@ -131,4 +131,9 @@ void Memory::DumpMemory()
 	DumpMemoryASCII(MemoryDumpStream);
 	MemoryDumpStream.flush();
 	MemoryDumpStream.close();
+}
+
+void Memory::RunSystem()
+{
+	r3000a->Run();
 }

@@ -213,6 +213,7 @@ Dma::Dma(Memory* memory)
 
 Dma::~Dma()
 {
+	log.close();
 }
 
 uint32_t Dma::ReadControl()

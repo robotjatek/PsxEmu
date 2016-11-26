@@ -44,7 +44,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	delay_slot = false;
 	if (instruction_counter > 1000000)
 	{
-		StartLogging();
+	//	StartLogging();
 	}
 	if (disasm->IsEnabled())
 	{
@@ -946,5 +946,10 @@ void R3000A::Run()
 	{
 		Step();
 	}
+}
+
+void R3000A::Stop()
+{
+	is_running = false;
 }
 

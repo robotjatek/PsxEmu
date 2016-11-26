@@ -161,6 +161,7 @@ public:
 	void Step();
 	void StartLogging();
 	void StopLogging();
+	void Stop();
 };
 
 
