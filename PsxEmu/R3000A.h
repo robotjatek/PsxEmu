@@ -74,7 +74,6 @@ private:
 	RTypeInstructionPtr rtypes[0x3F]; //0b00111111
 	typedef void (R3000A::*ITypeInstructionPtr)(uint8_t rt, uint8_t rs, uint16_t imm);
 	ITypeInstructionPtr itypes[0x3F];
-	typedef void (R3000A::*ITypeInstructionPtr)(uint8_t rt, uint8_t rs, uint16_t imm);
 	ITypeInstructionPtr regimm_itypes[0x2];
 	typedef void (R3000A::*JTypeInstructionPtr)(uint32_t target);
 	JTypeInstructionPtr jtypes[0x3F]; 

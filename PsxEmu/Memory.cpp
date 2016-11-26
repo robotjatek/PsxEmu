@@ -1,5 +1,6 @@
 #include "Memory.h"
 #include <iostream>
+#include <cstring>
 
 /* Fact: the PSX has a 4 kB I-cache. If the instruction is in the I-cache, it takes just 1 clock cycle to execute.
 The cache hit ratio is 95%, so most code run at full speed.*/

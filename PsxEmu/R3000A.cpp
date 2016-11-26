@@ -1,6 +1,7 @@
 #include "R3000A.h"
 #include "Cop0.h"
 #include "Memory.h"
+#include <cstring>
 //TODO: sign extend függvény megírása és meghívása minden signed memórahozzáféréshez
 
 void R3000A::Step()
@@ -41,7 +42,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 {
 
 	delay_slot = false;
-	if (pc == 0x80050ea8)
+	if (instruction_counter > 1000000)
 	{
 		StartLogging();
 	}

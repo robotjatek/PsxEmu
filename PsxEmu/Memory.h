@@ -199,6 +199,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 		r3000a->StopLogging();
 		DumpMemory();
 		ptr = nullptr;
+		exit(-1);
 	}
 
 	return reinterpret_cast<TYPE*>(ptr);
