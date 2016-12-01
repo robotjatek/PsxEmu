@@ -92,15 +92,15 @@ private:
 	bool DMA5Enabled;
 	bool DMA6Enabled;
 
-	InterruptFields_t CreateInterruptFieldFromInt(uint32_t interrupt_field);
-	ChannelControl_t CreateChannelControlFieldFromInt(uint32_t channel_control);
+	static InterruptFields_t CreateInterruptFieldFromInt(uint32_t interrupt_field);
+	static ChannelControl_t CreateChannelControlFieldFromInt(uint32_t channel_control);
 	void SetChannelMADR(uint8_t channel, uint32_t data);
 	void SetChannelBCR(uint8_t channel, uint32_t data);
 	void SetChannelCHCR(uint8_t channel, uint32_t data);
 
-	uint32_t GetChannelMADR(uint8_t channel);
-	uint32_t GetChannelBCR(uint8_t channel);
-	uint32_t GetChannelCHCR(uint8_t channel);
+	uint32_t GetChannelMADR(uint8_t channel) const;
+	uint32_t GetChannelBCR(uint8_t channel) const;
+	uint32_t GetChannelCHCR(uint8_t channel) const;
 	void DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum);
 	void Done(uint8_t ChannelNum);
 	uint32_t GetToDeviceAddress(uint8_t ChannelNumber);
@@ -134,12 +134,12 @@ public:
 
 	Dma(Memory* memory);
 	virtual ~Dma();
-	uint32_t ReadControl();
+	uint32_t ReadControl() const;
 	void WriteControl(uint32_t data);
-	uint32_t ReadInterrupt();
+	uint32_t ReadInterrupt() const;
 	void WriteInterrupt(uint32_t data);
 
 	void WriteToDMARegister(uint32_t address, uint32_t data);
-	uint32_t ReadFromDMARegister(uint32_t address);
+	uint32_t ReadFromDMARegister(uint32_t address) const;
 };
 

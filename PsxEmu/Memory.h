@@ -42,22 +42,22 @@
 class Memory
 {
 private:
-	uint8_t* m_rawData; //2M
-	uint8_t* m_parallel_port; //64k
-	uint8_t* m_scratch_pad; //1k //???: D-cache?
-	uint8_t* m_io_ports; //8k
-	uint8_t* bios_area; //512k
+	uint8_t* const m_rawData; //2M
+	uint8_t* const m_parallel_port; //64k
+	uint8_t* const m_scratch_pad; //1k //???: D-cache?
+	uint8_t* const m_io_ports; //8k
+	uint8_t* const bios_area; //512k
 	uint8_t seg2[4];
-	uint8_t* m_expansion_area1;
-	uint32_t transform_virtual_address_to_physical(uint32_t vaddr);
+	uint8_t* const m_expansion_area1;
+	static uint32_t transform_virtual_address_to_physical(uint32_t vaddr);
 	template <class TYPE>
 	TYPE* SetMemoryPointer(uint32_t vaddr);
 	void DumpMemoryHex(std::fstream& Stream);
 	void DumpMemoryASCII(std::fstream& Stream);
 
-	Dma* dma;
-	Gpu* gpu;
-	R3000A* r3000a;
+	Dma* const dma;
+	Gpu* const gpu;
+	R3000A* const r3000a;
 public:
 	Memory();
 	~Memory();
@@ -84,11 +84,11 @@ public:
 	};
 	void SetIStatFields(uint32_t toSet);
 	void DisableIStatFields(uint32_t ToDisable);
-	uint32_t GetIStatField();
-	uint32_t GetIMaskField();
-	R3000A* GetCpu();
+	uint32_t GetIStatField() const;
+	uint32_t GetIMaskField() const;
+	const R3000A* GetCpu() const;
 	void DumpMemory();
-	void RunSystem();
+	void RunSystem() const;
 };
 
 
@@ -199,7 +199,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 		printf("err addr: %08x\n", vaddr);
 		r3000a->StopLogging();
 		r3000a->Stop();
-		//DumpMemory();
+		DumpMemory();
 		ptr = nullptr;
 		//exit(-1);
 	}
@@ -220,22 +220,22 @@ inline TYPE Memory::Read(uint32_t address)
 	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
 		//DMA
-		return (TYPE)dma->ReadFromDMARegister(address);
+		return static_cast<TYPE>(dma->ReadFromDMARegister(address));
 	}
 	else if (address == 0x1f801810)
 	{
-		return (TYPE)gpu->GetGPURead();
+		return static_cast<TYPE>(gpu->GetGPURead());
 	}
 	else if (address == 0x1f801814)
 	{
-		return (TYPE)gpu->GetGPUStatus();
+		return static_cast<TYPE>(gpu->GetGPUStatus());
 	}
 	else
 	{
 		TYPE* ptr = SetMemoryPointer<TYPE>(address);
 		if (ptr)
 		{
-			return (TYPE)(*ptr);
+			return static_cast<TYPE>((*ptr));
 		}
 		else
 		{

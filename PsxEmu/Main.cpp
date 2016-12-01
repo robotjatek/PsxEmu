@@ -1,7 +1,6 @@
 #include <iostream>
 #include "Memory.h"
-#include "R3000A.h"
-#include <vld.h>
+//#include <vld.h>
 
 /*
 NOTES
@@ -45,6 +44,10 @@ the instruction after a branch, a jump or a load is always executed! Even if the
 
  --------------------------------------------------------------
  DMA: egy csomó módot támogat a hardver, de úgy néz ki, a játékok csak néhányat használnak
+
+-----------------------------------------------------------------
+
+https://www.youtube.com/watch?v=zBkNBP00wJE&feature=youtu.be&t=26m55s egy nagyon tanulságos videorészlet a const használatáról 26:55-28:10
 */
 
 

@@ -52,17 +52,17 @@ void Dma::SetChannelCHCR(uint8_t channel, uint32_t data)
 	DoDMA(Channel[channel], channel);
 }
 
-uint32_t Dma::GetChannelMADR(uint8_t channel)
+uint32_t Dma::GetChannelMADR(uint8_t channel) const
 {
 	return Channel[channel].D_MADR;
 }
 
-uint32_t Dma::GetChannelBCR(uint8_t channel)
+uint32_t Dma::GetChannelBCR(uint8_t channel) const
 {
 	return Channel[channel].D_BCR;
 }
 
-uint32_t Dma::GetChannelCHCR(uint8_t channel)
+uint32_t Dma::GetChannelCHCR(uint8_t channel) const
 {
 	return Channel[channel].D_CHCR;
 }
@@ -83,12 +83,10 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 			while (BC > 1)
 			{
 				log <<BC<<" "<< std::hex << address << " " << std::hex << address - 4 << "\n";
-//				pMemory->write_word(address, address - 4); //+4?
 				pMemory->Write<uint32_t>(address, address - 4);
 				address -= 4;
 				BC--;
 			}
-//			pMemory->write_word(address, 0x00ffffff); //last address in the OTC
 			pMemory->Write<uint32_t>(address, 0x00ffffff); //last address in the OTC
 			log << std::hex << address << " " << std::hex << 0x00ffffff << "\n";
 			log.flush();
@@ -101,7 +99,6 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	}
 	else if (chc.SyncMode == 2 && chc.StartBusy == 1) //only GPU
 	{
-		pMemory->GetCpu()->StartLogging();
 		printf("Syncmode 2 on channel %d started\n", channelNum);
 		log << "Syncmode 2 channel " << channelNum << "\n";
 		if (chc.TransferDirection == 1)//from main ram
@@ -109,16 +106,13 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 			uint32_t AddressOfNext;
 			do
 			{
-				//uint32_t Header = pMemory->read_word(rChannel.D_MADR);
 				uint32_t Header = pMemory->Read<uint32_t>(rChannel.D_MADR);
 				uint8_t NumOfPackets = Header >> 24;
 				AddressOfNext = Header & 0xffffff;
 				for (int i = 1; i <= NumOfPackets; i++)
 				{
-					//uint32_t ToSend = pMemory->read_word(rChannel.D_MADR + i*4);
 					uint32_t ToSend = pMemory->Read<uint32_t>(rChannel.D_MADR + i * 4);
 					log <<Header<<" "<< std::hex << rChannel.D_MADR + i * 4 << " Next: " << std::hex << AddressOfNext <<" "<<ToSend<< "\n";
-//					pMemory->write_word(0x1f801810, ToSend); //set to gp0. Im not entirely sure if its the right way to do DMA2, Nocash says: "DMA2 is equivalent to accessing Port 1F801810h (GP0/GPUREAD) by software." so i think its ok
 					pMemory->Write<uint32_t>(0x1f801810, ToSend); //set to gp0. Im not entirely sure if its the right way to do DMA2, Nocash says: "DMA2 is equivalent to accessing Port 1F801810h (GP0/GPUREAD) by software." so i think its ok
 				}
 				rChannel.D_MADR = AddressOfNext;
@@ -143,9 +137,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 			{
 				for (uint32_t j = 0; j < BS; j++)
 				{
-					//uint32_t data = pMemory->read_word(rChannel.D_MADR);
 					uint32_t data = pMemory->Read<uint32_t>(rChannel.D_MADR);
-//					pMemory->write_word(GetToDeviceAddress(channelNum), data);
 					pMemory->Write<uint32_t>(GetToDeviceAddress(channelNum), data);
 					rChannel.D_MADR += 4;
 				}
@@ -216,7 +208,7 @@ Dma::~Dma()
 	log.close();
 }
 
-uint32_t Dma::ReadControl()
+uint32_t Dma::ReadControl() const
 {
 	return Control;
 }
@@ -226,7 +218,7 @@ void Dma::WriteControl(uint32_t data)
 	Control = data;
 }
 
-uint32_t Dma::ReadInterrupt()
+uint32_t Dma::ReadInterrupt() const
 {
 	return Interrupt;
 }
@@ -273,7 +265,7 @@ void Dma::WriteToDMARegister(uint32_t address, uint32_t data)
 	}
 }
 
-uint32_t Dma::ReadFromDMARegister(uint32_t address)
+uint32_t Dma::ReadFromDMARegister(uint32_t address) const
 {
 	if (address == 0x1f8010f0)
 	{

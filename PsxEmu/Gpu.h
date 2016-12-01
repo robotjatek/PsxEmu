@@ -12,9 +12,9 @@ private:
 public:
 	Gpu();
 	virtual ~Gpu();
-	void SendGP0Command(uint32_t data); //0x1f801810 write
-	uint32_t GetGPURead(); //0x1f801810 read
+	void SendGP0Command(uint32_t data) const; //0x1f801810 write
+	uint32_t GetGPURead() const; //0x1f801810 read
 	void SendGP1Command(uint32_t data); //0x1f801814 write
-	uint32_t GetGPUStatus(); //0x1f801814 read
+	uint32_t GetGPUStatus() const; //0x1f801814 read
 };
 

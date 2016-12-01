@@ -32,7 +32,6 @@ inline uint32_t R3000A::Fetch()
 	pc += 4;
 
 	return ((t4 << 24) | (t3 << 16) | (t2 << 8) | t1);*/
-	//	uint32_t ret = m_memory->read_word(pc); //TODO: check if this is OK or not. What about big endian systems?
 	uint32_t ret = m_memory->Read<uint32_t>(pc);
 	pc += 4;
 	return ret;
@@ -120,7 +119,6 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		uint8_t copnum = opcode & 0x3;
 		ITypeInstruction i = getITypeFields(instruction_word);
 		int16_t offset = i.immediate;
-		//uint32_t w = m_memory->read_word(read_register(i.rs) + offset);
 		uint32_t w = m_memory->Read<uint32_t>(read_register(i.rs) + offset);
 		m_copx[copnum]->LoadWord(w, i.rt);
 	}
@@ -130,7 +128,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 		uint8_t copnum = opcode & 0x3;
 		ITypeInstruction i = getITypeFields(instruction_word);
 		int16_t offset = i.immediate;
-		//m_memory->write_word(read_register(i.rs) + offset, m_copx[copnum]->GetWord(i.rt));
+
 		m_memory->Write<uint32_t>(read_register(i.rs) + offset, m_copx[copnum]->GetWord(i.rt));
 	}
 	else
@@ -171,7 +169,7 @@ inline void R3000A::write_register(uint8_t reg, uint32_t data)
 	}
 }
 
-uint32_t R3000A::read_register(uint8_t reg)
+uint32_t R3000A::read_register(uint8_t reg) const
 {
 	reg &= 0x1F;
 	if (reg == 0)
@@ -216,14 +214,12 @@ struct JTypeInstruction R3000A::getJTypeFields(uint32_t opcode)
 
 inline void R3000A::RtypeNull(uint8_t, uint8_t, uint8_t)
 {
-	//RTypeInstruction r = getRTypeFields(m_memory->read_word(pc - 4));
 	RTypeInstruction r = getRTypeFields(m_memory->Read<uint32_t>(pc - 4));
 	Null(r.op, r.funct);
 }
 
 inline void R3000A::ItypeNull(uint8_t, uint8_t, uint16_t)
 {
-	//ITypeInstruction i = getITypeFields(m_memory->read_word(pc - 4));
 	ITypeInstruction i = getITypeFields(m_memory->Read<uint32_t>(pc - 4));
 	Null(i.op, 0);
 }

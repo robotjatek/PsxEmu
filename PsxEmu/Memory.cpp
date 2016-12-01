@@ -37,33 +37,30 @@ void Memory::DumpMemoryASCII(std::fstream & Stream)
 	}
 }
 
-Memory::Memory()
+Memory::Memory() :
+m_rawData(new uint8_t[MEMORY_SIZE]), //2Mb of RAM in PSX
+m_parallel_port(new uint8_t[PARALLEL_PORT_SIZE]),
+m_scratch_pad(new uint8_t[SCRATCH_PAD_SIZE]),
+m_io_ports(new uint8_t[HARDWARE_REGISTERS_SIZE]),
+bios_area(new uint8_t[BIOS_SIZE]),
+m_expansion_area1(new uint8_t[EXPANSION_REGION1_SIZE]),
+dma(new Dma(this)),
+gpu(new Gpu),
+r3000a(new R3000A(this))
 {
-	m_rawData = new uint8_t[MEMORY_SIZE]; //2Mb of RAM in PSX
 	memset(m_rawData, 0, MEMORY_SIZE);
-	m_parallel_port = new uint8_t[PARALLEL_PORT_SIZE];
 	memset(&m_parallel_port[0], 0, PARALLEL_PORT_SIZE);
-	m_scratch_pad = new uint8_t[SCRATCH_PAD_SIZE];
 	memset(&m_scratch_pad[0], 0, SCRATCH_PAD_SIZE);
-	m_io_ports = new uint8_t[HARDWARE_REGISTERS_SIZE];
 	memset(&m_io_ports[0], 0, HARDWARE_REGISTERS_SIZE);
 	uint32_t* ptr = SetMemoryPointer<uint32_t>(0x1f801000);
 	ptr[0] = 0x1f000000;
 	ptr[1] = 0x1f802000;
-	bios_area = new uint8_t[BIOS_SIZE];
 	memset(&bios_area[0], 0, sizeof(bios_area));
-	m_expansion_area1 = new uint8_t[EXPANSION_REGION1_SIZE];
 	memset(&m_expansion_area1[0], 0, EXPANSION_REGION1_SIZE);
-	gpu = new Gpu;
-	dma = new Dma(this);
-	r3000a = new R3000A(this);
 	if (!load_binary_to_bios_area("SCPH1001.BIN"))
 	{
 		std::cout << "Failed to load BIOS image\n";
 	}
-
-
-	DumpMemory();
 }
 
 
@@ -107,17 +104,17 @@ void Memory::DisableIStatFields(uint32_t ToDisable)
 	m_io_ports[I_STAT - HARDWARE_REGISTERS_START] &= ~ToDisable;
 }
 
-uint32_t Memory::GetIStatField()
+uint32_t Memory::GetIStatField() const
 {
 	return m_io_ports[I_STAT - HARDWARE_REGISTERS_START];
 }
 
-uint32_t Memory::GetIMaskField()
+uint32_t Memory::GetIMaskField() const
 {
 	return m_io_ports[I_MASK - HARDWARE_REGISTERS_START];
 }
 
-R3000A * Memory::GetCpu()
+const R3000A * Memory::GetCpu() const
 {
 	return r3000a;
 }
@@ -133,7 +130,7 @@ void Memory::DumpMemory()
 	MemoryDumpStream.close();
 }
 
-void Memory::RunSystem()
+void Memory::RunSystem() const
 {
 	r3000a->Run();
 }

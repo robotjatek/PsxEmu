@@ -32,14 +32,14 @@ void Disasm::Disable()
 	Enabled = false;
 }
 
-bool Disasm::IsEnabled()
+bool Disasm::IsEnabled() const
 {
 	return Enabled;
 }
 
 std::string Disasm::RtypeFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	RTypeInstruction ri = Cpu->getRTypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -52,7 +52,7 @@ std::string Disasm::RtypeFields(uint32_t Instruction)
 
 std::string Disasm::ItypeFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	ITypeInstruction ii = Cpu->getITypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -65,7 +65,7 @@ std::string Disasm::ItypeFields(uint32_t Instruction)
 
 std::string Disasm::BEQBNEFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	ITypeInstruction ii = Cpu->getITypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -78,7 +78,7 @@ std::string Disasm::BEQBNEFields(uint32_t Instruction)
 
 std::string Disasm::BranchFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	ITypeInstruction ii = Cpu->getITypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -90,7 +90,7 @@ std::string Disasm::BranchFields(uint32_t Instruction)
 
 std::string Disasm::JumpField(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	JTypeInstruction ji = Cpu->getJTypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -101,7 +101,7 @@ std::string Disasm::JumpField(uint32_t Instruction)
 
 std::string Disasm::JALRFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	RTypeInstruction ri = Cpu->getRTypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -113,7 +113,7 @@ std::string Disasm::JALRFields(uint32_t Instruction)
 
 std::string Disasm::LoadStoreFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	ITypeInstruction ii = Cpu->getITypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -128,7 +128,7 @@ std::string Disasm::LoadStoreFields(uint32_t Instruction)
 
 std::string Disasm::ShiftFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	RTypeInstruction ri = Cpu->getRTypeFields(Instruction);
 	std::stringstream retval;
 	retval
@@ -141,7 +141,7 @@ std::string Disasm::ShiftFields(uint32_t Instruction)
 
 std::string Disasm::LUIFields(uint32_t Instruction)
 {
-	R3000A* Cpu = pMemory->GetCpu();
+	const R3000A* Cpu = pMemory->GetCpu();
 	ITypeInstruction ii = Cpu->getITypeFields(Instruction);
 	std::stringstream retval;
 	retval

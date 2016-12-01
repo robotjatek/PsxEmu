@@ -65,10 +65,10 @@ private:
 	inline void Decode(uint32_t instruction_word);
 	bool is_running;
 	inline void write_register(uint8_t reg, uint32_t data);
-	uint32_t read_register(uint8_t reg);
-	struct RTypeInstruction getRTypeFields(uint32_t opcode);
-	struct ITypeInstruction getITypeFields(uint32_t opcode);
-	struct JTypeInstruction getJTypeFields(uint32_t opcode);
+	uint32_t read_register(uint8_t reg) const;
+	static struct RTypeInstruction getRTypeFields(uint32_t opcode);
+	static struct ITypeInstruction getITypeFields(uint32_t opcode);
+	static struct JTypeInstruction getJTypeFields(uint32_t opcode);
 
 	typedef void (R3000A::*RTypeInstructionPtr)(uint8_t rd, uint8_t rs, uint8_t rt);
 	RTypeInstructionPtr rtypes[0x3F]; //0b00111111
