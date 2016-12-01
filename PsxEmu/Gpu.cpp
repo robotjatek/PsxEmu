@@ -2,9 +2,8 @@
 #include <iostream>
 
 
-Gpu::Gpu()
+Gpu::Gpu(): vram(new uint8_t[VRAM_SIZE])
 {
-	vram = new uint8_t[VRAM_SIZE];
 }
 
 

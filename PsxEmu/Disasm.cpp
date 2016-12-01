@@ -4,9 +4,8 @@
 #include <sstream>
 
 
-Disasm::Disasm(Memory* pMemory)
+Disasm::Disasm(Memory* pMemory) : pMemory(pMemory)
 {
-	this->pMemory = pMemory;
 	Enabled = false;
 }
 

@@ -16,7 +16,7 @@ public:
 
 private:
 	bool Enabled;
-	Memory* pMemory;
+	Memory* const pMemory;
 
 	typedef std::string (Disasm::*OpcodeTable)(uint32_t Instruction);
 	typedef std::string (Disasm::*RtypeTable)(uint32_t Instruction);

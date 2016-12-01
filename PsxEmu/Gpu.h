@@ -6,7 +6,7 @@
 class Gpu
 {
 private:
-	uint8_t* vram;
+	uint8_t* const vram;
 	uint32_t commandBuffer[16]; //64 byte (16 word) command buffer
 
 public:
