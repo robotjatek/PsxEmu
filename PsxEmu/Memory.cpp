@@ -48,6 +48,7 @@ dma(new Dma(this)),
 gpu(new Gpu),
 r3000a(new R3000A(this))
 {
+	InitOK = true;
 	memset(m_rawData, 0, MEMORY_SIZE);
 	memset(&m_parallel_port[0], 0, PARALLEL_PORT_SIZE);
 	memset(&m_scratch_pad[0], 0, SCRATCH_PAD_SIZE);
@@ -60,6 +61,7 @@ r3000a(new R3000A(this))
 	if (!load_binary_to_bios_area("SCPH1001.BIN"))
 	{
 		std::cout << "Failed to load BIOS image\n";
+		InitOK = false;
 	}
 }
 
@@ -122,15 +124,20 @@ const R3000A * Memory::GetCpu() const
 void Memory::DumpMemory()
 {
 	std::fstream MemoryDumpStream;
+	std::cout << "Dumping memory... ";
 	MemoryDumpStream.open("MemoryDump.txt", std::ios::out);
 	DumpMemoryHex(MemoryDumpStream);
 	MemoryDumpStream << "---------------------------------------------------------------------------" << std::endl;
 	DumpMemoryASCII(MemoryDumpStream);
 	MemoryDumpStream.flush();
 	MemoryDumpStream.close();
+	std::cout << "Done!" << std::endl;
 }
 
 void Memory::RunSystem() const
 {
-	r3000a->Run();
+	if (InitOK)
+	{
+		r3000a->Run();
+	}
 }
