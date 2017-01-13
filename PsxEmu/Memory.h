@@ -54,6 +54,7 @@ private:
 	TYPE* SetMemoryPointer(uint32_t vaddr);
 	void DumpMemoryHex(std::fstream& Stream);
 	void DumpMemoryASCII(std::fstream& Stream);
+	bool InitOK;
 
 	Dma* const dma;
 	Gpu* const gpu;
