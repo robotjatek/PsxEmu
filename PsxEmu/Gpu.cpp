@@ -29,4 +29,5 @@ void Gpu::SendGP1Command(uint32_t data)
 uint32_t Gpu::GetGPUStatus() const
 {
 	return 0x1c000000;
+	//return 0;
 }

@@ -1,6 +1,7 @@
 #include "Memory.h"
 #include <iostream>
 #include <cstring>
+#include <random>
 
 /* Fact: the PSX has a 4 kB I-cache. If the instruction is in the I-cache, it takes just 1 clock cycle to execute.
 The cache hit ratio is 95%, so most code run at full speed.*/
@@ -132,5 +133,6 @@ void Memory::DumpMemory()
 
 void Memory::RunSystem() const
 {
+//	r3000a->StartLogging();
 	r3000a->Run();
 }

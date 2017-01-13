@@ -41,7 +41,7 @@ inline void R3000A::Decode(uint32_t instruction_word)
 {
 
 	delay_slot = false;
-	if (instruction_counter > 1000000)
+	if (instruction_counter > 17000000)
 	{
 	//	StartLogging();
 	}

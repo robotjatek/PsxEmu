@@ -109,6 +109,10 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	{
 		vaddr = transform_virtual_address_to_physical(vaddr);
 		ptr = &m_rawData[vaddr - MAIN_MEMORY_START];
+		if(vaddr == 0x108 || vaddr == 0x109 || vaddr == 0x110 || vaddr == 0x111)
+		{
+			printf(":(\n");
+		}
 	}
 	else if ((vaddr >= HARDWARE_REGISTERS_START && vaddr <= HARDWARE_REGISTERS_END))
 	{
@@ -228,6 +232,7 @@ inline TYPE Memory::Read(uint32_t address)
 	}
 	else if (address == 0x1f801814)
 	{
+		r3000a->StopLogging();
 		return static_cast<TYPE>(gpu->GetGPUStatus());
 	}
 	else

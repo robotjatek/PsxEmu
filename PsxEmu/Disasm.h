@@ -111,13 +111,13 @@ private:
 	std::string XORI(uint32_t Instruction);
 
 
-	const RegImmTable const RegImmPtr[18] = {
+	const RegImmTable RegImmPtr[18] = {
 		&Disasm::BLTZ, &Disasm::BGEZ, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		&Disasm::BLTZAL, &Disasm::BGEZAL
 	};
 
-	const RtypeTable const RtypePtr[64] = {
+	const RtypeTable RtypePtr[64] = {
 		&Disasm::SLL, nullptr, &Disasm::SRL, &Disasm::SRA, &Disasm::SLLV, nullptr, &Disasm::SRLV, &Disasm::SRAV,
 		&Disasm::JR, &Disasm::JALR, nullptr, nullptr, &Disasm::SYSCALL, &Disasm::BREAK, nullptr, nullptr,
 		&Disasm::MFHI, &Disasm::MTHI, &Disasm::MFLO, &Disasm::MTLO, nullptr, nullptr, nullptr, nullptr,
@@ -128,7 +128,7 @@ private:
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
 	};
 
-	const OpcodeTable const OpcodePtr[64] = {
+	const OpcodeTable OpcodePtr[64] = {
 		&Disasm::DecodeRtype, &Disasm::DecodeRegImm, &Disasm::J, &Disasm::JAL, &Disasm::BEQ, &Disasm::BNE, &Disasm::BLEZ, &Disasm::BGTZ,
 		&Disasm::ADDI, &Disasm::ADDIU, &Disasm::SLTI, &Disasm::SLTIU, &Disasm::ANDI, &Disasm::ORI, &Disasm::XORI, &Disasm::LUI,
 		&Disasm::DecodeCop, &Disasm::DecodeCop, &Disasm::DecodeCop, &Disasm::DecodeCop, nullptr, nullptr, nullptr, nullptr,
