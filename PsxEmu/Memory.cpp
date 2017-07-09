@@ -139,6 +139,7 @@ void Memory::RunSystem() const
 {
 	if (InitOK)
 	{
+		r3000a->StartLogging();
 		r3000a->Run();
 	}
 }

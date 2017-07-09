@@ -112,6 +112,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 		ptr = &m_rawData[vaddr - MAIN_MEMORY_START];
 		if(vaddr == 0x108 || vaddr == 0x109 || vaddr == 0x110 || vaddr == 0x111)
 		{
+			r3000a->StopLogging();
 			printf(":(\n");
 		}
 	}
