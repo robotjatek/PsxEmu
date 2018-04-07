@@ -38,7 +38,7 @@ Dma::ChannelControl_t Dma::CreateChannelControlFieldFromInt(uint32_t channel_con
 
 void Dma::SetChannelMADR(uint8_t channel, uint32_t data)
 {
-	Channel[channel].D_MADR = data; //24-31 bits are always zero
+	Channel[channel].D_MADR = data & 0xffffff; //24-31 bits are always zero
 }
 
 void Dma::SetChannelBCR(uint8_t channel, uint32_t data)
@@ -79,12 +79,12 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 			uint32_t BC = rChannel.D_BCR & 0xffff; //only the low 16 bits are used in SyncMode 0
 			uint32_t address = rChannel.D_MADR & 0xffffff; //the low 24 bits are used as an address
 			uint8_t num = (rChannel.D_MADR) >> 24; //number of elements in the ordering table. Should be 0 as this is the initialization
-			//int8_t step = chc.MemoryAddressStep ? -4 : 4;
+			int8_t step = chc.MemoryAddressStep ? -4 : 4;
 			while (BC > 1)
 			{
 				log <<BC<<" "<< std::hex << address << " " << std::hex << address - 4 << "\n";
-				pMemory->Write<uint32_t>(address, address - 4);
-				address -= 4;
+				pMemory->Write<uint32_t>(address, address + step);
+				address += step;
 				BC--;
 			}
 			pMemory->Write<uint32_t>(address, 0x00ffffff); //last address in the OTC
@@ -101,6 +101,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	{
 		printf("Syncmode 2 on channel %d started\n", channelNum);
 		log << "Syncmode 2 channel " << channelNum << "\n";
+		pMemory->StartLogging();
 		if (chc.TransferDirection == 1)//from main ram
 		{
 			uint32_t AddressOfNext;
@@ -130,7 +131,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 		//uint32_t address = rChannel.D_MADR;
 		uint32_t BA = rChannel.D_BCR >> 16;
 		uint32_t BS = rChannel.D_BCR & 0xffff;
-//		int8_t step = chc.MemoryAddressStep ? -4 : 4;
+		int8_t step = chc.MemoryAddressStep ? -4 : 4;
 		if (chc.TransferDirection == 1)//from main ram
 		{
 			for (uint32_t i = 0; i < BA; i++)
@@ -139,7 +140,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 				{
 					uint32_t data = pMemory->Read<uint32_t>(rChannel.D_MADR);
 					pMemory->Write<uint32_t>(GetToDeviceAddress(channelNum), data);
-					rChannel.D_MADR += 4;
+					rChannel.D_MADR += step;
 				}
 			}
 

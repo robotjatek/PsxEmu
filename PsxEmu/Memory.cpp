@@ -6,6 +6,10 @@
 /* Fact: the PSX has a 4 kB I-cache. If the instruction is in the I-cache, it takes just 1 clock cycle to execute.
 The cache hit ratio is 95%, so most code run at full speed.*/
 
+void Memory::StartLogging()
+{
+	this->r3000a->StartLogging();
+}
 
 uint32_t Memory::transform_virtual_address_to_physical(uint32_t vaddr)
 {
@@ -139,7 +143,7 @@ void Memory::RunSystem() const
 {
 	if (InitOK)
 	{
-		r3000a->StartLogging();
+		//r3000a->StartLogging();
 		r3000a->Run();
 	}
 }

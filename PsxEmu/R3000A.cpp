@@ -39,7 +39,6 @@ inline uint32_t R3000A::Fetch()
 
 inline void R3000A::Decode(uint32_t instruction_word)
 {
-
 	delay_slot = false;
 	if (instruction_counter > 17000000)
 	{
@@ -55,7 +54,9 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	{
 		//rtype instruction
 		RTypeInstruction r = getRTypeFields(instruction_word);
-		if (r.funct == 0 || r.funct == 1 || r.funct == 3)
+		if ( r.funct == 0 //SLL
+			|| r.funct == 2 //SRL
+			|| r.funct == 3) //SRA)
 		{
 			(this->*rtypes[r.funct])(r.rd, r.sht, r.rt);
 		}
@@ -139,10 +140,6 @@ inline void R3000A::Decode(uint32_t instruction_word)
 
 
 	instruction_counter++;
-	if (instruction_counter == 100000)
-	{
-		//	printf("adas");
-	}
 
 	//handle delay slot after a branch, load or jump
 	if (delay_slot)
@@ -558,8 +555,16 @@ inline void R3000A::Lw(uint8_t rt, uint8_t base, uint16_t offset)
 {
 	//TODO: address error exception? 
 	//TODO: isolate cache
-	int16_t signed_offset = offset;
-	write_register(rt, m_memory->Read<uint32_t>(read_register(base) + signed_offset));
+	if (!m_cop0->GetStatusRegisterBit(Cop0::StatusRegisterFields::IsC))
+	{
+		int16_t signed_offset = offset;
+		write_register(rt, m_memory->Read<uint32_t>(
+			read_register(base) + signed_offset));
+	}
+	else
+	{
+		printf("isolated\n");
+	}
 }
 
 inline void R3000A::Lwcz(uint8_t, uint8_t, uint16_t)
@@ -727,7 +732,7 @@ inline void R3000A::Srav(uint8_t rd, uint8_t rs, uint8_t rt)
 
 inline void R3000A::Srl(uint8_t rd, uint8_t rs, uint8_t rt)
 {
-	write_register(rd, read_register(rt) >> rs);
+	write_register(rd, (read_register(rt) >> rs));
 }
 
 inline void R3000A::Srlv(uint8_t rd, uint8_t rs, uint8_t rt)

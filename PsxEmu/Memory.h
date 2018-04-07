@@ -90,18 +90,13 @@ public:
 	const R3000A* GetCpu() const;
 	void DumpMemory();
 	void RunSystem() const;
+	void StartLogging();
 };
-
 
 template<class TYPE>
 inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 {
 	uint8_t* ptr = nullptr;
-	if (vaddr == 0x8007929c)
-	{
-		//r3000a->StartLogging();
-		//printf("asd");
-	}
 	if ((vaddr >= BIOS_START_UNCACHED && vaddr <= BIOS_END_UNCACHED))
 	{
 		ptr = &(bios_area[vaddr - BIOS_START_UNCACHED]);
@@ -110,11 +105,6 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	{
 		vaddr = transform_virtual_address_to_physical(vaddr);
 		ptr = &m_rawData[vaddr - MAIN_MEMORY_START];
-		if(vaddr == 0x108 || vaddr == 0x109 || vaddr == 0x110 || vaddr == 0x111)
-		{
-			r3000a->StopLogging();
-			printf(":(\n");
-		}
 	}
 	else if ((vaddr >= HARDWARE_REGISTERS_START && vaddr <= HARDWARE_REGISTERS_END))
 	{
@@ -171,10 +161,10 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 				std::cout << "RAM size accessed" << std::endl;
 				break;
 			case 0x1f801070:
-				//				std::cout << "Interrupt status reg\n";
+								std::cout << "Interrupt status reg\n";
 				break;
 			case 0x1f801074:
-				//				std::cout << "Interrupt mask reg\n";
+								std::cout << "Interrupt mask reg\n";
 				break;
 			case 0x1f801810:
 				printf("Gpu port\n");
@@ -234,7 +224,7 @@ inline TYPE Memory::Read(uint32_t address)
 	}
 	else if (address == 0x1f801814)
 	{
-		r3000a->StopLogging();
+		//r3000a->StopLogging();
 		return static_cast<TYPE>(gpu->GetGPUStatus());
 	}
 	else
@@ -257,7 +247,6 @@ void Memory::Write(uint32_t address, TYPE data)
 	if (address >= 0x1F801080 && address <= 0x1F8010FC)
 	{
 		//DMA
-		//r3000a->StartLogging();
 		dma->WriteToDMARegister(address, data);
 	}
 	else if (address == 0x1f801810)
