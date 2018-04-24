@@ -161,10 +161,10 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 				std::cout << "RAM size accessed" << std::endl;
 				break;
 			case 0x1f801070:
-								std::cout << "Interrupt status reg\n";
+								//std::cout << "Interrupt status reg\n";
 				break;
 			case 0x1f801074:
-								std::cout << "Interrupt mask reg\n";
+								//std::cout << "Interrupt mask reg\n";
 				break;
 			case 0x1f801810:
 				printf("Gpu port\n");

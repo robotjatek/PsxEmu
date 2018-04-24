@@ -8,12 +8,38 @@ class Gpu
 private:
 	uint8_t* const vram;
 	uint32_t commandBuffer[16]; //64 byte (16 word) command buffer
+	uint8_t currentCommand;
+	bool inCommand;
+	uint32_t commandState;
+	uint32_t remainingWords;
+
+	struct PSXVertex
+	{
+		uint16_t x, y;
+		uint32_t color;
+		uint8_t u, v;
+	};
+
+	struct PolygonData
+	{
+		uint16_t ColorLookupTableIndex;
+		uint16_t TexturePageIndex;
+		PSXVertex vertices[4];
+	};
+
+	PolygonData currentPolygon;
+
+	void EnterCommandProcessing(uint8_t command);
+
+	void GraduatedPolygon(uint8_t polyCount, uint32_t data);
+
+	void TexturedPolygon(uint8_t polyCount, uint32_t data);
 
 public:
 	Gpu();
 	virtual ~Gpu();
-	void SendGP0Command(uint32_t data) const; //0x1f801810 write
-	uint32_t GetGPURead() const; //0x1f801810 read
+	void SendGP0Command(uint32_t data); //0x1f801810 write
+	uint32_t GetGPURead(); //0x1f801810 read
 	void SendGP1Command(uint32_t data); //0x1f801814 write
 	uint32_t GetGPUStatus() const; //0x1f801814 read
 };

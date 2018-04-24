@@ -101,7 +101,6 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	{
 		printf("Syncmode 2 on channel %d started\n", channelNum);
 		log << "Syncmode 2 channel " << channelNum << "\n";
-		pMemory->StartLogging();
 		if (chc.TransferDirection == 1)//from main ram
 		{
 			uint32_t AddressOfNext;
@@ -164,7 +163,7 @@ void Dma::Done(uint8_t ChannelNum)
 	Channel[ChannelNum].D_CHCR &= ~ChannelControlFields::StartTrigger;
 
 	//IRQ
-/*	InterruptFields_t irq = CreateInterruptFieldFromInt(Interrupt);
+	InterruptFields_t irq = CreateInterruptFieldFromInt(Interrupt);
 	if (irq.ForceIRQ == true || (irq.MasterEnable == true && irq.EnableIRQ))
 	{
 		if ((irq.EnableIRQ & (1 << ChannelNum)))
@@ -180,7 +179,6 @@ void Dma::Done(uint8_t ChannelNum)
 	{
 		Interrupt &= ~DMAInterruptFields::MasterFlag;
 	}
-	*/
 }
 
 uint32_t Dma::GetToDeviceAddress(uint8_t ChannelNumber)

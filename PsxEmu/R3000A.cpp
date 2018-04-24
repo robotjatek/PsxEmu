@@ -40,10 +40,7 @@ inline uint32_t R3000A::Fetch()
 inline void R3000A::Decode(uint32_t instruction_word)
 {
 	delay_slot = false;
-	if (instruction_counter > 17000000)
-	{
-	//	StartLogging();
-	}
+	
 	if (disasm->IsEnabled())
 	{
 		InstructionLogger << std::hex << pc - 4 << " " << disasm->DecodeInstruction(instruction_word) << "\n";
@@ -145,7 +142,8 @@ inline void R3000A::Decode(uint32_t instruction_word)
 	if (delay_slot)
 	{
 		Decode(Fetch());
-		//	if (!exception_pending) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
+		
+		//if (!exception_pending) //check if the instruction is still in the delay slot, because interrupts roll back the pc to the previous branch instruction
 		{
 			pc = delay_slot_address;
 		}
