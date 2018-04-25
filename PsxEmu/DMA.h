@@ -82,7 +82,6 @@ private:
 	uint32_t Interrupt;
 	ChannelRegisters_t Channel[7];
 	Memory* pMemory;
-	std::ofstream log;
 
 	bool DMA0Enabled;
 	bool DMA1Enabled;

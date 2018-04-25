@@ -72,24 +72,20 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	ChannelControl_t chc = CreateChannelControlFieldFromInt(rChannel.D_CHCR);
 	if (chc.SyncMode == 0 && chc.StartBusy == 1 && chc.StartTrigger == 1)
 	{
-		log << "Syncmode 0, Channel 6:\n";
 		if (channelNum == 6) //Clear Reverse Ordering Table
 		{
-			printf("Manual DMA mode started on channel %d\n",channelNum);
+			//printf("Manual DMA mode started on channel %d\n",channelNum);
 			uint32_t BC = rChannel.D_BCR & 0xffff; //only the low 16 bits are used in SyncMode 0
 			uint32_t address = rChannel.D_MADR & 0xffffff; //the low 24 bits are used as an address
 			uint8_t num = (rChannel.D_MADR) >> 24; //number of elements in the ordering table. Should be 0 as this is the initialization
 			int8_t step = chc.MemoryAddressStep ? -4 : 4;
 			while (BC > 1)
 			{
-				log <<BC<<" "<< std::hex << address << " " << std::hex << address - 4 << "\n";
 				pMemory->Write<uint32_t>(address, address + step);
 				address += step;
 				BC--;
 			}
 			pMemory->Write<uint32_t>(address, 0x00ffffff); //last address in the OTC
-			log << std::hex << address << " " << std::hex << 0x00ffffff << "\n";
-			log.flush();
 			Done(channelNum);
 		}
 		else
@@ -99,8 +95,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	}
 	else if (chc.SyncMode == 2 && chc.StartBusy == 1) //only GPU
 	{
-		printf("Syncmode 2 on channel %d started\n", channelNum);
-		log << "Syncmode 2 channel " << channelNum << "\n";
+		//printf("Syncmode 2 on channel %d started\n", channelNum);
 		if (chc.TransferDirection == 1)//from main ram
 		{
 			uint32_t AddressOfNext;
@@ -112,13 +107,11 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 				for (int i = 1; i <= NumOfPackets; i++)
 				{
 					uint32_t ToSend = pMemory->Read<uint32_t>(rChannel.D_MADR + i * 4);
-					log <<Header<<" "<< std::hex << rChannel.D_MADR + i * 4 << " Next: " << std::hex << AddressOfNext <<" "<<ToSend<< "\n";
 					pMemory->Write<uint32_t>(0x1f801810, ToSend); //set to gp0. Im not entirely sure if its the right way to do DMA2, Nocash says: "DMA2 is equivalent to accessing Port 1F801810h (GP0/GPUREAD) by software." so i think its ok
 				}
 				rChannel.D_MADR = AddressOfNext;
 			} while (AddressOfNext != 0xffffff);
 			Done(channelNum);
-			log.flush();
 		}
 		else //to main ram
 		{
@@ -152,7 +145,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 	}
 	else
 	{
-		printf("Unhandled DMA Sync mode!!! %d on channel: %d\n", chc.SyncMode, channelNum);
+		//printf("Unhandled DMA Sync mode!!! %d on channel: %d\n", chc.SyncMode, channelNum);
 	}
 }
 
@@ -199,12 +192,10 @@ Dma::Dma(Memory* memory)
 {
 	Control = 0x07654321; //From no$psx specification
 	pMemory = memory;
-	log.open("log.txt", std::ios::out);
 }
 
 Dma::~Dma()
 {
-	log.close();
 }
 
 uint32_t Dma::ReadControl() const

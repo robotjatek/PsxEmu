@@ -1,32 +1,20 @@
 #pragma once
 #include <cstdint>
+#include "RendererGL.h"
+#include "GPUData.h"
 
 #define VRAM_SIZE 1048510 //1 MB of VRAM
 //TODO: GPU timer
 class Gpu
 {
 private:
+	RendererGL renderer;
 	uint8_t* const vram;
 	uint32_t commandBuffer[16]; //64 byte (16 word) command buffer
 	uint8_t currentCommand;
 	bool inCommand;
 	uint32_t commandState;
 	uint32_t remainingWords;
-
-	struct PSXVertex
-	{
-		uint16_t x, y;
-		uint32_t color;
-		uint8_t u, v;
-	};
-
-	struct PolygonData
-	{
-		uint16_t ColorLookupTableIndex;
-		uint16_t TexturePageIndex;
-		PSXVertex vertices[4];
-	};
-
 	PolygonData currentPolygon;
 
 	void EnterCommandProcessing(uint8_t command);

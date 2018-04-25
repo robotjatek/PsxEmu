@@ -14,12 +14,12 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	int vertexId = commandState / 2;
 	if (commandState % 2 == 0)
 	{
-		currentPolygon.vertices[vertexId].x = data & 0xFFFF;
-		currentPolygon.vertices[vertexId].y = data >> 16;
+		currentPolygon.vertices[vertexId].color = data & 0xFFFFFF;
 	}
 	else
 	{
-		currentPolygon.vertices[vertexId].color = data & 0xFFFFFF;
+		currentPolygon.vertices[vertexId].x = data & 0xFFFF;
+		currentPolygon.vertices[vertexId].y = data >> 16;
 	}
 
 	commandState++;
@@ -27,6 +27,8 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
+		if(polyCount == 3)
+			renderer.PushPolygons(currentPolygon, polyCount);
 	}
 }
 
@@ -87,7 +89,7 @@ Gpu::~Gpu()
 
 void Gpu::SendGP0Command(uint32_t data)
 {
-	printf("GP0: %08x\n",data);
+	//printf("GP0: %08x\n",data);
 	uint8_t command = (uint8_t)((data & 0xFF000000) >> 24);
 	
 	if (!inCommand)
@@ -157,6 +159,7 @@ void Gpu::SendGP0Command(uint32_t data)
 		case 0xe5:
 			// TODO:   GP0(E5h) - Set Drawing Offset (X,Y)
 			printf("Implement GP0(E5h)\n");
+			renderer.SwapBuffers(); //TODO: remove this hack
 			break;
 		case 0xe6:
 			//TODO: GP0(E6h) - Mask Bit Setting
@@ -164,6 +167,7 @@ void Gpu::SendGP0Command(uint32_t data)
 			break;
 		default:
 			printf("NOT IMPLEMENTED GP0 COMMAND!\n");
+			printf("GP0: %08x\n", data);
 			break;
 		}
 	}

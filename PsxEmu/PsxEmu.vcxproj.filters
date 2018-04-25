@@ -36,6 +36,9 @@
     <ClCompile Include="Disasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RendererGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="R3000A.h">
@@ -59,5 +62,14 @@
     <ClInclude Include="Disasm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RendererGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
