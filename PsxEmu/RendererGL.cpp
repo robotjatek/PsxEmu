@@ -45,14 +45,6 @@ void RendererGL::SwapBuffers()
 
 	if (vertices.size())
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, vboId);
-		glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLuint), &vertices[0], GL_DYNAMIC_DRAW);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
-		glVertexAttribPointer(1, 3, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
-		glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLuint), &colors[0], GL_DYNAMIC_DRAW);
-
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size()/2);
 	}
 
@@ -139,14 +131,63 @@ GLuint RendererGL::LoadShaders()
 	return programId;
 }
 
-void RendererGL::PushPolygons(PolygonData polygon, int numberOfPolygons)
+void RendererGL::PushPolygons(const PolygonData& polygon, int numberOfPolygons)
 {
-	for (int i = 0; i < numberOfPolygons; i++)
+	if (numberOfPolygons == 3)
 	{
-		vertices.push_back(polygon.vertices[i].x);
-		vertices.push_back(polygon.vertices[i].y);
-		colors.push_back(polygon.vertices[i].r);
-		colors.push_back(polygon.vertices[i].g);
-		colors.push_back(polygon.vertices[i].b);
+		for (int i = 0; i < numberOfPolygons; i++)
+		{
+			vertices.push_back(polygon.vertices[i].x);
+			vertices.push_back(polygon.vertices[i].y);
+			colors.push_back(polygon.vertices[i].r);
+			colors.push_back(polygon.vertices[i].g);
+			colors.push_back(polygon.vertices[i].b);
+		}
 	}
+	else if (numberOfPolygons == 4)
+	{
+		vertices.push_back(polygon.vertices[0].x);
+		vertices.push_back(polygon.vertices[0].y);
+		colors.push_back(polygon.vertices[0].r);
+		colors.push_back(polygon.vertices[0].g);
+		colors.push_back(polygon.vertices[0].b);
+
+		vertices.push_back(polygon.vertices[1].x);
+		vertices.push_back(polygon.vertices[1].y);
+		colors.push_back(polygon.vertices[1].r);
+		colors.push_back(polygon.vertices[1].g);
+		colors.push_back(polygon.vertices[1].b);
+
+		vertices.push_back(polygon.vertices[2].x);
+		vertices.push_back(polygon.vertices[2].y);
+		colors.push_back(polygon.vertices[2].r);
+		colors.push_back(polygon.vertices[2].g);
+		colors.push_back(polygon.vertices[2].b);
+
+		vertices.push_back(polygon.vertices[2].x);
+		vertices.push_back(polygon.vertices[2].y);
+		colors.push_back(polygon.vertices[2].r);
+		colors.push_back(polygon.vertices[2].g);
+		colors.push_back(polygon.vertices[2].b);
+
+		vertices.push_back(polygon.vertices[3].x);
+		vertices.push_back(polygon.vertices[3].y);
+		colors.push_back(polygon.vertices[3].r);
+		colors.push_back(polygon.vertices[3].g);
+		colors.push_back(polygon.vertices[3].b);
+
+		vertices.push_back(polygon.vertices[1].x);
+		vertices.push_back(polygon.vertices[1].y);
+		colors.push_back(polygon.vertices[1].r);
+		colors.push_back(polygon.vertices[1].g);
+		colors.push_back(polygon.vertices[1].b);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboId);
+	glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLuint), &vertices[0], GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
+	glVertexAttribPointer(1, 3, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLuint), &colors[0], GL_DYNAMIC_DRAW);
 }

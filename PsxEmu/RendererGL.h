@@ -19,6 +19,6 @@ public:
 	virtual ~RendererGL();
 	void SwapBuffers();
 	GLuint LoadShaders();
-	void PushPolygons(PolygonData polygon, int numberOfPolygons);
+	void PushPolygons(const PolygonData& polygon, int numberOfPolygons);
 };
 

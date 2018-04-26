@@ -29,8 +29,7 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
-		if(polyCount == 3)
-			renderer.PushPolygons(currentPolygon, polyCount);
+		renderer.PushPolygons(currentPolygon, polyCount);
 	}
 }
 
