@@ -11,7 +11,9 @@ private:
 	GLFWwindow * window;
 	GLuint vertexArrayId;
 	GLuint vboId;
+	GLuint colorBufferId;
 	std::vector<GLuint> vertices;
+	std::vector<GLuint> colors;
 public:
 	RendererGL();
 	virtual ~RendererGL();

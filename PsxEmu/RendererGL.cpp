@@ -25,6 +25,8 @@ RendererGL::RendererGL()
 
 	glGenBuffers(1, &vboId);
 	glBindBuffer(GL_ARRAY_BUFFER, vboId);
+	glGenBuffers(1, &colorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
 
 	GLuint shader = LoadShaders();
 	glUseProgram(shader);
@@ -39,19 +41,28 @@ void RendererGL::SwapBuffers()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-	glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
 	if (vertices.size())
 	{
+		glBindBuffer(GL_ARRAY_BUFFER, vboId);
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLuint), &vertices[0], GL_DYNAMIC_DRAW);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
+		glVertexAttribPointer(1, 3, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
+		glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLuint), &colors[0], GL_DYNAMIC_DRAW);
+
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size()/2);
 	}
+
+	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 	vertices.clear();
+	colors.clear();
 }
 
 GLuint RendererGL::LoadShaders()
@@ -62,6 +73,9 @@ GLuint RendererGL::LoadShaders()
 	std::string vertexShaderCode = R"(
 										#version 330
 										layout(location = 0) in vec2 position;
+										layout(location = 1) in vec3 color;
+										
+										out vec3 fragment_color;
 
 										void main()
 										{
@@ -69,17 +83,19 @@ GLuint RendererGL::LoadShaders()
 											gl_Position.y = 1.0-(position.y/256);
 											gl_Position.z = 0.0;
 											gl_Position.w = 1.0;
+											fragment_color = color;
 										}
 )";
 
 
 	std::string fragmentShaderCode = R"(
 										#version 330
-										out vec3 color;
+										in vec3 fragment_color;
+										out vec3 color_out;
 
 										void main()
 										{
-											color = vec3(1,0,0);
+											color_out = fragment_color/255.0;
 										}
 )";
 
@@ -129,5 +145,8 @@ void RendererGL::PushPolygons(PolygonData polygon, int numberOfPolygons)
 	{
 		vertices.push_back(polygon.vertices[i].x);
 		vertices.push_back(polygon.vertices[i].y);
+		colors.push_back(polygon.vertices[i].r);
+		colors.push_back(polygon.vertices[i].g);
+		colors.push_back(polygon.vertices[i].b);
 	}
 }

@@ -14,7 +14,9 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	int vertexId = commandState / 2;
 	if (commandState % 2 == 0)
 	{
-		currentPolygon.vertices[vertexId].color = data & 0xFFFFFF;
+		currentPolygon.vertices[vertexId].r = (data & 0xff);
+		currentPolygon.vertices[vertexId].g = ((data & 0xff00) >> 8);
+		currentPolygon.vertices[vertexId].b = (data >> 16);
 	}
 	else
 	{
@@ -108,10 +110,13 @@ void Gpu::SendGP0Command(uint32_t data)
 			this->EnterCommandProcessing(command);
 
 			uint32_t color = data & 0xFFFFFF;
-			currentPolygon.vertices[0].color = color;
-			currentPolygon.vertices[1].color = color;
-			currentPolygon.vertices[2].color = color;
-			currentPolygon.vertices[3].color = color;
+			for (int i = 0; i < 4; i++)
+			{
+				currentPolygon.vertices[i].r = color & 0xff;
+				currentPolygon.vertices[i].g = (color & 0xff00) >> 8;
+				currentPolygon.vertices[i].b = color >> 16;
+			}
+			
 			break;
 		}
 		case 0x2c:

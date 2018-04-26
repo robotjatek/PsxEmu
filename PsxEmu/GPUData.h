@@ -4,7 +4,7 @@
 struct PSXVertex
 {
 	uint16_t x, y;
-	uint32_t color;
+	uint8_t r, g, b;
 	uint8_t u, v;
 };
 
