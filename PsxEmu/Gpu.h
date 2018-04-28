@@ -8,7 +8,7 @@
 class Gpu
 {
 private:
-	RendererGL renderer;
+	RendererGL* renderer;
 	uint8_t* const vram;
 	uint32_t commandBuffer[16]; //64 byte (16 word) command buffer
 	uint8_t currentCommand;
@@ -24,7 +24,7 @@ private:
 	void MonochromePolygon(const uint8_t polyCount, const uint32_t data);
 
 public:
-	Gpu();
+	Gpu(RendererGL* renderer);
 	virtual ~Gpu();
 	void SendGP0Command(const uint32_t data); //0x1f801810 write
 	uint32_t GetGPURead(); //0x1f801810 read

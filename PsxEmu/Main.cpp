@@ -68,6 +68,5 @@ int main()
 	Memory memory;
 	memory.RunSystem();
 
-	system("pause");
 	return 0;
 }

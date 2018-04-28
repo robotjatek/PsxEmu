@@ -29,7 +29,7 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
-		renderer.PushPolygons(currentPolygon, polyCount);
+		renderer->PushPolygons(currentPolygon, polyCount);
 	}
 }
 
@@ -84,20 +84,22 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 		this->inCommand = false;
 		this->commandState = 0;
 		vertexId = 0;
-		renderer.PushPolygons(currentPolygon, 4);
+		renderer->PushPolygons(currentPolygon, 4);
 	}
 }
 
-Gpu::Gpu(): vram(new uint8_t[VRAM_SIZE])
+Gpu::Gpu(RendererGL* renderer): vram(new uint8_t[VRAM_SIZE])
 {
 	this->inCommand = false;
 	this->commandState = 0;
 	this->remainingWords = 0;
+	this->renderer = renderer;
 }
 
 
 Gpu::~Gpu()
 {
+	delete renderer;
 	delete[] vram;
 }
 
@@ -189,10 +191,10 @@ void Gpu::SendGP0Command(uint32_t data)
 		{
 			int16_t offsetX = data & 0x7ff;
 			int16_t offsetY = (data & 0x3ff800) >> 11;
-			renderer.UpdateDrawingOffset(offsetX, offsetY);
+			renderer->UpdateDrawingOffset(offsetX, offsetY);
 			//XXX: based on noca$h specs. "Everything you wanted to ask..." says only bits 13..11 are the Y offset
 
-			renderer.SwapBuffers(); //TODO: remove this hack
+			renderer->SwapBuffers(); //TODO: remove this hack
 			break;
 		}
 		case 0xe6:

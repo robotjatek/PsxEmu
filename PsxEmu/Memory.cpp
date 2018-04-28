@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <random>
+#include "RendererGL.h"
 
 /* Fact: the PSX has a 4 kB I-cache. If the instruction is in the I-cache, it takes just 1 clock cycle to execute.
 The cache hit ratio is 95%, so most code run at full speed.*/
@@ -50,7 +51,7 @@ m_io_ports(new uint8_t[HARDWARE_REGISTERS_SIZE]),
 bios_area(new uint8_t[BIOS_SIZE]),
 m_expansion_area1(new uint8_t[EXPANSION_REGION1_SIZE]),
 dma(new Dma(this)),
-gpu(new Gpu),
+gpu(new Gpu(new RendererGL(this))),
 r3000a(new R3000A(this))
 {
 	InitOK = true;
@@ -146,4 +147,9 @@ void Memory::RunSystem() const
 		//r3000a->StartLogging();
 		r3000a->Run();
 	}
+}
+
+void Memory::StopSystem() const
+{
+	r3000a->Stop();
 }

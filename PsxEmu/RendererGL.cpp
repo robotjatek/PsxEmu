@@ -2,18 +2,26 @@
 #include <cstdlib>
 #include <string>
 #include <Windows.h>
+#include "Memory.h"
 
 _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 
-RendererGL::RendererGL()
+void RendererGL::WindowCloseCallback(GLFWwindow* window)
 {
+	glfwDestroyWindow(window);
+}
 
+RendererGL::RendererGL(const Memory* memory)
+{
+	this->memory = memory;
 	glfwInit();
 	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_VERSION_MINOR, 4);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	this->window = glfwCreateWindow(1024, 512, "PSX", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
+
+	glfwSetWindowCloseCallback(window, this->WindowCloseCallback);
 	
 	glewExperimental = true;
 	glewInit();
@@ -53,6 +61,12 @@ void RendererGL::SwapBuffers()
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE))
+	{
+		memory->StopSystem();
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();

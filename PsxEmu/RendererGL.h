@@ -5,9 +5,12 @@
 #include "GPUData.h"
 #include <vector>
 
+class Memory;
+
 class RendererGL
 {
 private:
+	const Memory * memory;
 	GLFWwindow * window;
 	GLuint vertexArrayId;
 	GLuint vboId;
@@ -15,8 +18,9 @@ private:
 	GLuint shaderId;
 	std::vector<GLuint> vertices;
 	std::vector<GLuint> colors;	
+	static void WindowCloseCallback(GLFWwindow* window);
 public:
-	RendererGL();
+	RendererGL(const Memory* memory);
 	virtual ~RendererGL();
 	void SwapBuffers();
 	GLuint LoadShaders();

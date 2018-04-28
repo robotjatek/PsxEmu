@@ -90,6 +90,7 @@ public:
 	const R3000A* GetCpu() const;
 	void DumpMemory();
 	void RunSystem() const;
+	void StopSystem() const;
 	void StartLogging();
 };
 
