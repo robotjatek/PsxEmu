@@ -186,10 +186,15 @@ void Gpu::SendGP0Command(uint32_t data)
 			printf("Implement GP0(E4h)\n");
 			break;
 		case 0xe5:
-			// TODO:   GP0(E5h) - Set Drawing Offset (X,Y)
-			printf("Implement GP0(E5h)\n");
+		{
+			int16_t offsetX = data & 0x7ff;
+			int16_t offsetY = (data & 0x3ff800) >> 11;
+			renderer.UpdateDrawingOffset(offsetX, offsetY);
+			//XXX: based on noca$h specs. "Everything you wanted to ask..." says only bits 13..11 are the Y offset
+
 			renderer.SwapBuffers(); //TODO: remove this hack
 			break;
+		}
 		case 0xe6:
 			//TODO: GP0(E6h) - Mask Bit Setting
 			printf("Implement GP0(E6h)\n");

@@ -28,8 +28,8 @@ RendererGL::RendererGL()
 	glGenBuffers(1, &colorBufferId);
 	glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
 
-	GLuint shader = LoadShaders();
-	glUseProgram(shader);
+	shaderId = LoadShaders();
+	glUseProgram(shaderId);
 }
 
 RendererGL::~RendererGL()
@@ -71,11 +71,13 @@ GLuint RendererGL::LoadShaders()
 										layout(location = 1) in vec3 color;
 										
 										out vec3 fragment_color;
+										uniform int offsetX;
+										uniform int offsetY;
 
 										void main()
 										{
-											gl_Position.x = position.x/512 - 1.0;
-											gl_Position.y = 1.0-(position.y/256);
+											gl_Position.x = position.x/512 - 1.0 + offsetX;
+											gl_Position.y = 1.0-(position.y/256) + offsetY;
 											gl_Position.z = 0.0;
 											gl_Position.w = 1.0;
 											fragment_color = color;
@@ -193,4 +195,13 @@ void RendererGL::PushPolygons(const PolygonData& polygon, int numberOfPolygons)
 	glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
 	glVertexAttribPointer(1, 3, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
 	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLuint), &colors[0], GL_DYNAMIC_DRAW);
+}
+
+void RendererGL::UpdateDrawingOffset(const GLint offsetX, const GLint offsetY)
+{
+	GLuint location;
+	location = glGetUniformLocation(shaderId, "offsetX");
+	glUniform1i(location, offsetX);
+	location = glGetUniformLocation(shaderId, "offsetY");
+	glUniform1i(location, offsetY);
 }

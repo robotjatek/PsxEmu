@@ -12,13 +12,15 @@ private:
 	GLuint vertexArrayId;
 	GLuint vboId;
 	GLuint colorBufferId;
+	GLuint shaderId;
 	std::vector<GLuint> vertices;
-	std::vector<GLuint> colors;
+	std::vector<GLuint> colors;	
 public:
 	RendererGL();
 	virtual ~RendererGL();
 	void SwapBuffers();
 	GLuint LoadShaders();
 	void PushPolygons(const PolygonData& polygon, int numberOfPolygons);
+	void UpdateDrawingOffset(const GLint offsetX, const GLint offsetY);
 };
 
