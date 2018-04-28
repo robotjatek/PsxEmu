@@ -33,15 +33,25 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	}
 }
 
+void Gpu::ExtractColorData(const uint32_t data, const uint8_t polyCount)
+{
+	uint32_t color = data & 0xFFFFFF;
+	for (int i = 0; i < polyCount; i++)
+	{
+		currentPolygon.vertices[i].r = color & 0xff;
+		currentPolygon.vertices[i].g = (color & 0xff00) >> 8;
+		currentPolygon.vertices[i].b = color >> 16;
+	}
+}
+
 void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 {
-	uint8_t vertexId = commandState / 2;
-	
+	static uint8_t vertexId = 0;
 	if (commandState == 0)
 	{
-		//TODO: ignoring color
+		ExtractColorData(data, polyCount);
 	}
-	else if (commandState / 2 == 0)
+	else if (commandState % 2 == 1)
 	{
 		uint16_t x, y;
 		x = data & 0xFFFF;
@@ -65,6 +75,7 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 		{
 			currentPolygon.TexturePageIndex = data >> 16;
 		}
+		vertexId++;
 	}
 
 	commandState++;
@@ -72,6 +83,8 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
+		vertexId = 0;
+		renderer.PushPolygons(currentPolygon, 4);
 	}
 }
 
@@ -88,9 +101,28 @@ Gpu::~Gpu()
 	delete[] vram;
 }
 
+void Gpu::MonochromePolygon(const uint8_t polyCount, const uint32_t data)
+{
+	if (commandState == 0)
+	{
+		ExtractColorData(data, polyCount);
+	}
+	else
+	{
+		currentPolygon.vertices[commandState].x = data & 0xFFFF;
+		currentPolygon.vertices[commandState].y = data >> 16;
+	}
+
+	commandState++;
+	if (this->commandState == 4)
+	{
+		this->inCommand = false;
+		this->commandState = 0;
+	}
+}
+
 void Gpu::SendGP0Command(uint32_t data)
 {
-	//printf("GP0: %08x\n",data);
 	uint8_t command = (uint8_t)((data & 0xFF000000) >> 24);
 	
 	if (!inCommand)
@@ -107,14 +139,7 @@ void Gpu::SendGP0Command(uint32_t data)
 		case 0x28:
 		{
 			this->EnterCommandProcessing(command);
-
-			uint32_t color = data & 0xFFFFFF;
-			for (int i = 0; i < 4; i++)
-			{
-				currentPolygon.vertices[i].r = color & 0xff;
-				currentPolygon.vertices[i].g = (color & 0xff00) >> 8;
-				currentPolygon.vertices[i].b = color >> 16;
-			}
+			MonochromePolygon(4, data);
 			
 			break;
 		}
@@ -181,15 +206,7 @@ void Gpu::SendGP0Command(uint32_t data)
 		{
 		case 0x28:
 		{
-			currentPolygon.vertices[commandState].x = data & 0xFFFF;
-			currentPolygon.vertices[commandState].y = data >> 16;
-
-			commandState++;
-			if (this->commandState == 4)
-			{
-				this->inCommand = false;
-				this->commandState = 0;
-			}
+			MonochromePolygon(4, data);
 			break;
 		}
 		case 0x2c:

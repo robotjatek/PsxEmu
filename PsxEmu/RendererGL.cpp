@@ -34,6 +34,9 @@ RendererGL::RendererGL()
 
 RendererGL::~RendererGL()
 {
+	glDeleteBuffers(1, &vboId);
+	glDeleteBuffers(1, &colorBufferId);
+	glDeleteVertexArrays(1, &vertexArrayId);
 	glfwTerminate();
 }
 
