@@ -1,10 +1,9 @@
 #pragma once
 #include <cstdint>
-#include <string>
-#include <fstream>
 #include "Gpu.h"
 #include "DMA.h"
 #include "R3000A.h"
+#include <plog\Log.h>
 
 #define BIOS_START 0x1fc00000
 #define BIOS_END 0x1fc7ffff
@@ -123,34 +122,34 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 			switch (vaddr)
 			{
 			case 0x1f801000:
-				printf("Expansion 1 Base Address\n");
+				LOG_VERBOSE << "Expansion 1 Base Address";
 				break;
 			case 0x1f801004:
-				printf("Expansion 2 Base Address\n");
+				LOG_INFO <<"Expansion 2 Base Address";
 				break;
 			case 0x1f801008:
-				printf("Expansion 1 Delay/Size\n");
+				LOG_INFO <<"Expansion 1 Delay/Size";
 				break;
 			case 0x1f80100c:
-				printf("Expansion 3 Delay/Size \n");
+				LOG_INFO <<"Expansion 3 Delay/Size";
 				break;
 			case 0x1f801010:
-				printf("BIOS ROM    Delay/Size\n");
+				LOG_INFO <<"BIOS ROM    Delay/Size";
 				break;
 			case 0x1f801014:
-				printf("SPU_DELAY   Delay/Size\n");
+				LOG_INFO <<"SPU_DELAY   Delay/Size";
 				break;
 			case 0x1f801018:
-				printf("CDROM_DELAY Delay/Size\n");
+				LOG_INFO << "CDROM_DELAY Delay/Size";
 				break;
 			case 0x1f80101c:
-				printf("Expansion 2 Delay/Size\n");
+				LOG_INFO <<"Expansion 2 Delay/Size";
 				break;
 			case 0x1f801020:
-				printf("COM_DELAY / COMMON_DELAY\n");
+				LOG_INFO <<"COM_DELAY / COMMON_DELAY";
 				break;
 			default:
-				printf("Unhandled access: %08x\n", vaddr);
+				LOG_FATAL << "Unhandled access: 0x" << std::hex << vaddr;
 				break;
 			}
 		}
@@ -159,7 +158,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 			switch (vaddr)
 			{
 			case 0x1f801060:
-				std::cout << "RAM size accessed" << std::endl;
+				LOG_VERBOSE << "RAM size accessed";
 				break;
 			case 0x1f801070:
 								//std::cout << "Interrupt status reg\n";
@@ -168,13 +167,13 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 								//std::cout << "Interrupt mask reg\n";
 				break;
 			case 0x1f801810:
-				printf("Gpu port\n");
+				//printf("Gpu port\n");
 				break;
 			case 0x1f801814:
-				printf("Gpu port\n");
+				//printf("Gpu port\n");
 				break;
 			default:
-				printf("Unhandled IO port: %08x\n", vaddr);
+				LOG_WARNING << "Unhandled IO port: 0x" << std::hex << vaddr;
 				break;
 			}
 		}
@@ -182,18 +181,18 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 	}
 	else if ((vaddr >= EXPANSION_REGION1_KUSEG_START && vaddr <= EXPANSION_REGION1_KUSEG_END))
 	{
-		std::cout << "Expansion region 1: " << std::hex << vaddr << std::endl;
+		LOG_INFO << "Expansion region 1: " << std::hex << vaddr;
 		ptr = &(m_expansion_area1[vaddr - EXPANSION_REGION1_KUSEG_START]);
 	}
 	else if (vaddr == 0xfffe0130)
 	{
-		std::cout << "Cache control register accessed. Implement cache!\n";
+		LOG_WARNING << "Cache control register accessed. Implement cache!";
 		ptr = &seg2[0];
 		//TODO: implement cache
 	}
 	else
 	{
-		printf("err addr: %08x\n", vaddr);
+		LOG_FATAL << "err addr: 0x" << std::hex << vaddr;
 		r3000a->StopLogging();
 		r3000a->Stop();
 		DumpMemory();

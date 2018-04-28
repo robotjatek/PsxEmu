@@ -1,6 +1,5 @@
 #include "Gpu.h"
-#include <iostream>
-
+#include <plog\Log.h>
 
 void Gpu::EnterCommandProcessing(uint8_t command)
 {
@@ -132,10 +131,10 @@ void Gpu::SendGP0Command(uint32_t data)
 		switch (command)
 		{
 		case 0x00:
-			printf("GP0 NOP\n");
+			LOG_VERBOSE << "GP0 NOP";
 			break;
 		case 0x01:
-			printf("GP0 CLEAR CACHE\n");
+			LOG_WARNING << "Iplement GP0 CLEAR CACHE";
 			//TODO: implement GP0(0x01) - clear cache
 			break;
 		case 0x28:
@@ -173,19 +172,19 @@ void Gpu::SendGP0Command(uint32_t data)
 		}
 		case 0xe1:
 			// TODO: GP0(E1h) - Draw Mode setting (aka "Texpage")
-			printf("Implement GP0(E1h)\n");
+			LOG_WARNING << "Implement GP0(E1h)";
 			break;
 		case 0xe2:
 			// TODO:  GP0(E2h) - Texture Window setting
-			printf("Implement GP0(E2h)\n");
+			LOG_WARNING << "Implement GP0(E2h)";
 			break;
 		case 0xe3:
 			// TODO: GP0(E3h) - Set Drawing Area top left (X1,Y1)
-			printf("Implement GP0(E3h)\n");
+			LOG_WARNING << "Implement GP0(E3h)";
 			break;
 		case 0xe4:
 			// TODO:  GP0(E4h) - Set Drawing Area bottom right (X2,Y2)
-			printf("Implement GP0(E4h)\n");
+			LOG_WARNING << "Implement GP0(E4h)";
 			break;
 		case 0xe5:
 		{
@@ -199,11 +198,11 @@ void Gpu::SendGP0Command(uint32_t data)
 		}
 		case 0xe6:
 			//TODO: GP0(E6h) - Mask Bit Setting
-			printf("Implement GP0(E6h)\n");
+			LOG_WARNING << "Implement GP0(E6h)";
 			break;
 		default:
-			printf("NOT IMPLEMENTED GP0 COMMAND!\n");
-			printf("GP0: %08x\n", data);
+			LOG_ERROR <<"NOT IMPLEMENTED GP0 COMMAND!";
+			LOG_ERROR << "GP0: %08x " << data;
 			break;
 		}
 	}
@@ -233,15 +232,16 @@ void Gpu::SendGP0Command(uint32_t data)
 		}
 		case 0xa0:
 		{
+			static uint16_t x, y;
+			static uint16_t xSize, ySize;
+
 			if (commandState == 0)
 			{
-				uint16_t x, y;
 				x = data & 0x0000FFFF;
 				y = ((data & 0xFFFF0000) >> 16);
 			}
 			else if (commandState == 1)
 			{
-				uint16_t xSize, ySize;
 				xSize = data & 0x0000FFFF;
 				ySize = ((data & 0xFFFF0000) >> 16);
 				uint32_t imagesize = xSize * ySize;
@@ -250,12 +250,17 @@ void Gpu::SendGP0Command(uint32_t data)
 			}
 			else
 			{
+
 				//TODO: elfogadni a memóriába jövõ image datát
 				this->remainingWords--;
 				if (remainingWords == 0)
 				{
 					this->inCommand = false;
 					this->commandState = 0;
+					x = 0;
+					y = 0;
+					xSize = 0;
+					ySize = 0;
 				}
 			}
 
@@ -284,7 +289,7 @@ void Gpu::SendGP0Command(uint32_t data)
 			break;
 		}
 		default:
-			printf("Something went wrong\n");
+			LOG_ERROR << "Something went wrong: Hit default while processing a GPU command";
 			break;
 		}
 	}
@@ -308,7 +313,7 @@ uint32_t Gpu::GetGPURead()
 
 void Gpu::SendGP1Command(uint32_t data)
 {
-	printf("GP1: %08x\n", data);
+	LOG_WARNING << "GP1: %08x " << data;
 }
 
 uint32_t Gpu::GetGPUStatus() const

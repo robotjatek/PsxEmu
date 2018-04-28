@@ -3,7 +3,6 @@
 #include "Disasm.h"
 #include "ICoprocessor.h"
 #include <cstdint>
-#include <iostream>
 #include <fstream>
 
 class Memory; //Forward declaration

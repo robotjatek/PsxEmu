@@ -1,9 +1,6 @@
 #include "DMA.h"
 #include "Memory.h"
 
-#include <cstdio>
-#include <fstream>
-
 Dma::InterruptFields_t Dma::CreateInterruptFieldFromInt(uint32_t interrupt_field)
 {
 	InterruptFields_t f;
@@ -90,7 +87,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 		}
 		else
 		{
-			printf("unimplemented DMA channel (%d) for mode %d\n",channelNum,chc.SyncMode);
+			LOG_ERROR << "Unimplemented DMA channel: " << channelNum << " for mode: " << chc.SyncMode;
 		}
 	}
 	else if (chc.SyncMode == 2 && chc.StartBusy == 1) //only GPU
@@ -115,7 +112,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 		}
 		else //to main ram
 		{
-			printf("To main ram direction is not supported\n");
+			LOG_ERROR << "To main ram direction is not supported!";
 		}
 	}
 	else if (chc.SyncMode == 1)
@@ -140,7 +137,7 @@ void Dma::DoDMA(ChannelRegisters_t& rChannel, uint8_t channelNum)
 		}
 		else
 		{
-			printf("To main ram direction is not supported\n");
+			LOG_ERROR << "To main ram direction is not supported";
 		}
 	}
 	else
@@ -182,7 +179,7 @@ uint32_t Dma::GetToDeviceAddress(uint8_t ChannelNumber)
 		return 0x1F801810;
 		break;
 	default:
-		printf("Unsupported channel!\n");
+		LOG_ERROR << "Unsupported DMA channel!";
 		return 0;
 		break;
 	}
@@ -249,7 +246,7 @@ void Dma::WriteToDMARegister(uint32_t address, uint32_t data)
 			SetChannelCHCR(ChannelNum, data);
 			break;
 		default:
-			printf("Unhandled DMA register access");
+			LOG_ERROR << "Unhandled DMA register access";
 			break;
 		}
 	}
@@ -282,7 +279,7 @@ uint32_t Dma::ReadFromDMARegister(uint32_t address) const
 			return GetChannelCHCR(ChannelNum);
 			break;
 		default:
-			printf("Unhandled DMA register access");
+			LOG_ERROR << "Unhandled DMA register access";
 			break;
 		}
 	}

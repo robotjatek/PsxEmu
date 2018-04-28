@@ -1,5 +1,4 @@
 #include "Memory.h"
-#include <iostream>
 #include <cstring>
 #include <random>
 #include "RendererGL.h"
@@ -66,7 +65,7 @@ r3000a(new R3000A(this))
 	memset(&m_expansion_area1[0], 0, EXPANSION_REGION1_SIZE);
 	if (!load_binary_to_bios_area("SCPH1001.BIN"))
 	{
-		std::cout << "Failed to load BIOS image\n";
+		LOG_FATAL << "Failed to load BIOS image";
 		InitOK = false;
 	}
 }
@@ -130,14 +129,13 @@ const R3000A * Memory::GetCpu() const
 void Memory::DumpMemory()
 {
 	std::fstream MemoryDumpStream;
-	std::cout << "Dumping memory... ";
+	LOG_INFO << "Dumping memory... ";
 	MemoryDumpStream.open("MemoryDump.txt", std::ios::out);
 	DumpMemoryHex(MemoryDumpStream);
 	MemoryDumpStream << "---------------------------------------------------------------------------" << std::endl;
 	DumpMemoryASCII(MemoryDumpStream);
 	MemoryDumpStream.flush();
 	MemoryDumpStream.close();
-	std::cout << "Done!" << std::endl;
 }
 
 void Memory::RunSystem() const

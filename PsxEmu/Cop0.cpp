@@ -1,5 +1,5 @@
 #include "Cop0.h"
-#include <iostream>
+#include <plog\Log.h>
 
 
 Cop0::Cop0()
@@ -16,7 +16,7 @@ Cop0::~Cop0()
 uint32_t Cop0::setException(uint32_t pc, ExceptionCodes exceptioncode, bool branch_delay, uint8_t coprocessor_error, uint32_t badvaddr)
 {
 	//todo: interrupt/exception mask
-	std::cout << "Exception occured. Code: " << std::hex << exceptioncode << std::endl;
+	LOG_INFO << "Exception occured. Code: " << std::hex << exceptioncode;
 
 	cop_registers[RegisterNames::Cause] &= ~CauseRegisterFields::ExceptionCode;
 	cop_registers[RegisterNames::Cause] |= (exceptioncode << 2);

@@ -1,5 +1,7 @@
 #include <iostream>
 #include "Memory.h"
+#include <plog\Log.h>
+#include <plog\Appenders\ColorConsoleAppender.h>
 //#include <vld.h>
 
 /*
@@ -65,6 +67,14 @@ TODO: a pipelinet lehet hogy emulálni kéne
 
 int main()
 {
+#if _DEBUG
+	static plog::ColorConsoleAppender<plog::TxtFormatter> console;
+	plog::init(plog::verbose, &console);
+#else
+	static plog::ColorConsoleAppender<plog::TxtFormatter> console;
+	plog::init(plog::error, &console);
+#endif
+
 	Memory memory;
 	memory.RunSystem();
 

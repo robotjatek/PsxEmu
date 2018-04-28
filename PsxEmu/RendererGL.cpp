@@ -3,6 +3,7 @@
 #include <string>
 #include <Windows.h>
 #include "Memory.h"
+#include <plog\Log.h>
 
 _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 
@@ -20,7 +21,7 @@ RendererGL::RendererGL(const Memory* memory)
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	this->window = glfwCreateWindow(1024, 512, "PSX", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
-
+	glfwSwapInterval(0);
 	glfwSetWindowCloseCallback(window, this->WindowCloseCallback);
 	
 	glewExperimental = true;
@@ -123,7 +124,7 @@ GLuint RendererGL::LoadShaders()
 	if (InfoLogLength > 0) {
 		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
 		glGetShaderInfoLog(vertexShaderId, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
+		LOG_FATAL << "Error while compiling vertex shader";// << VertexShaderErrorMessage;
 	}
 
 	glShaderSource(fragmentShaderId, 1, &fp, nullptr);
@@ -134,7 +135,7 @@ GLuint RendererGL::LoadShaders()
 	if (InfoLogLength > 0) {
 		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
 		glGetShaderInfoLog(fragmentShaderId, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
+		LOG_FATAL << "Error while compiling fragment shader";// << VertexShaderErrorMessage;
 	}
 
 	GLuint programId = glCreateProgram();

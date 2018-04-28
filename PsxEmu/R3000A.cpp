@@ -227,7 +227,7 @@ inline void R3000A::JtypeNull(uint32_t)
 
 inline void R3000A::Null(uint8_t op, uint8_t funct)
 {
-	std::cout << "unrecognized opcode: " << (int)op << "funct: " << (int)funct << "pc: " << std::hex << pc << std::endl;
+	LOG_FATAL << "Unrecognized opcode: " << (int)op << "funct: " << (int)funct << "pc: " << std::hex << pc;
 	this->is_running = false;
 }
 
@@ -264,7 +264,6 @@ inline void R3000A::Add(uint8_t rd, uint8_t rs, uint8_t rt)
 		pc = m_cop0->setException(pc - 4, Cop0::ExceptionCodes::Ovf, this->delay_slot);
 		this->exception_pending = true;
 		this->delay_slot = false;
-		std::cout << "overflow\n";
 	}
 	else
 	{
@@ -561,7 +560,7 @@ inline void R3000A::Lw(uint8_t rt, uint8_t base, uint16_t offset)
 	}
 	else
 	{
-		printf("isolated\n");
+		LOG_INFO << "Cache is isolated";
 	}
 }
 
@@ -662,7 +661,7 @@ inline void R3000A::Sb(uint8_t rt, uint8_t base, uint16_t offset)
 	}
 	else
 	{
-		std::cout << "Cache is isolated" << std::endl;
+		LOG_INFO << "Cache is isolated";
 		//todo: implement cache
 	}
 }
@@ -677,7 +676,7 @@ inline void R3000A::Sh(uint8_t rt, uint8_t base, uint16_t offset)
 	}
 	else
 	{
-		std::cout << "Cache is isolated" << std::endl;
+		LOG_INFO << "Cache is isolated";
 		//todo: implement cache
 	}
 }
@@ -748,7 +747,6 @@ inline void R3000A::Sub(uint8_t rd, uint8_t rs, uint8_t rt)
 		pc = m_cop0->setException(pc - 4, Cop0::ExceptionCodes::Ovf, this->delay_slot);
 		this->exception_pending = true;
 		this->delay_slot = false;
-		std::cout << "overflow\n";
 	}
 	else
 	{
@@ -805,7 +803,7 @@ inline void R3000A::Syscall(uint8_t, uint8_t, uint8_t)
 	pc = m_cop0->setException(this->pc - 4, Cop0::ExceptionCodes::Sys, this->delay_slot);
 	this->exception_pending = true;
 	this->delay_slot = false;
-	std::cout << "syscall\n";
+	LOG_DEBUG << "Syscall";
 }
 
 inline void R3000A::Xor(uint8_t rd, uint8_t rs, uint8_t rt)
