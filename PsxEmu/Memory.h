@@ -173,7 +173,7 @@ inline TYPE * Memory::SetMemoryPointer(uint32_t vaddr)
 				//printf("Gpu port\n");
 				break;
 			default:
-				LOG_WARNING << "Unhandled IO port: 0x" << std::hex << vaddr;
+				LOG_INFO << "Unhandled IO port: 0x" << std::hex << vaddr;
 				break;
 			}
 		}

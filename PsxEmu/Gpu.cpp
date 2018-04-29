@@ -89,6 +89,7 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 
 Gpu::Gpu(RendererGL* renderer): vram(new uint8_t[VRAM_SIZE])
 {
+	this->vramPointer = reinterpret_cast<uint16_t*>(vram);
 	this->inCommand = false;
 	this->commandState = 0;
 	this->remainingWords = 0;
@@ -122,6 +123,44 @@ void Gpu::MonochromePolygon(const uint8_t polyCount, const uint32_t data)
 	}
 }
 
+void Gpu::WriteVRAM(uint32_t data)
+{
+	uint32_t frameBufferPixelId = CalculateFrambufferPixelId();
+
+	uint16_t pixel1 = data >> 16;
+	uint16_t pixel0 = data & 0xffff;
+	this->vramPointer[frameBufferPixelId] = pixel0;
+	this->vramPointer[frameBufferPixelId + 1] = pixel1;
+
+	IncrementVramAccessHelpers();
+
+	this->remainingWords--;
+	if (remainingWords == 0)
+	{
+		this->inCommand = false;
+		this->commandState = 0;
+		vramAccess.x = 0;
+		vramAccess.y = 0;
+		vramAccess.xSize = 0;
+		vramAccess.ySize = 0;
+	}
+}
+
+void Gpu::IncrementVramAccessHelpers()
+{
+	vramAccess.currentX += 2;
+	if (vramAccess.currentX >= vramAccess.x + vramAccess.xSize)
+	{
+		vramAccess.currentX = vramAccess.x;
+		vramAccess.currentY++;
+	}
+}
+
+uint32_t Gpu::CalculateFrambufferPixelId()
+{
+	return vramAccess.currentY * 1024 + vramAccess.currentX;
+}
+
 void Gpu::SendGP0Command(uint32_t data)
 {
 	uint8_t command = (uint8_t)((data & 0xFF000000) >> 24);
@@ -134,14 +173,13 @@ void Gpu::SendGP0Command(uint32_t data)
 			LOG_VERBOSE << "GP0 NOP";
 			break;
 		case 0x01:
-			LOG_WARNING << "Iplement GP0 CLEAR CACHE";
+			LOG_INFO << "Implement GP0 CLEAR CACHE";
 			//TODO: implement GP0(0x01) - clear cache
 			break;
 		case 0x28:
 		{
 			this->EnterCommandProcessing(command);
 			MonochromePolygon(4, data);
-			
 			break;
 		}
 		case 0x2c:
@@ -232,59 +270,17 @@ void Gpu::SendGP0Command(uint32_t data)
 		}
 		case 0xa0:
 		{
-			static uint16_t x, y;
-			static uint16_t xSize, ySize;
-
-			if (commandState == 0)
+			SetVRAMAccessVariables(data);
+			if (commandState > 1)
 			{
-				x = data & 0x0000FFFF;
-				y = ((data & 0xFFFF0000) >> 16);
+				WriteVRAM(data);
 			}
-			else if (commandState == 1)
-			{
-				xSize = data & 0x0000FFFF;
-				ySize = ((data & 0xFFFF0000) >> 16);
-				uint32_t imagesize = xSize * ySize;
-				imagesize = (imagesize + 1) & 0xFFFFFFFE;
-				this->remainingWords = imagesize / 2;
-			}
-			else
-			{
-
-				//TODO: elfogadni a memóriába jövõ image datát
-				this->remainingWords--;
-				if (remainingWords == 0)
-				{
-					this->inCommand = false;
-					this->commandState = 0;
-					x = 0;
-					y = 0;
-					xSize = 0;
-					ySize = 0;
-				}
-			}
-
 			commandState++;
 			break;
 		}
 		case 0xc0:
 		{
-			if (commandState == 0)
-			{
-				uint16_t x, y;
-				x = data & 0x0000FFFF;
-				y = ((data & 0xFFFF0000) >> 16);
-			}
-			else if (commandState == 1)
-			{
-				uint16_t xSize, ySize;
-				xSize = data & 0x0000FFFF;
-				ySize = ((data & 0xFFFF0000) >> 16);
-				uint32_t imagesize = xSize * ySize;
-				imagesize = (imagesize + 1) & 0xFFFFFFFE;
-				this->remainingWords = imagesize / 2;
-			}
-
+			SetVRAMAccessVariables(data);
 			commandState++;
 			break;
 		}
@@ -295,11 +291,40 @@ void Gpu::SendGP0Command(uint32_t data)
 	}
 }
 
+void Gpu::SetVRAMAccessVariables(uint32_t data)
+{
+	if (commandState == 0)
+	{
+		vramAccess.x = data & 0x0000FFFF;
+		vramAccess.y = ((data & 0xFFFF0000) >> 16);
+
+		vramAccess.currentX = vramAccess.x;
+		vramAccess.currentY = vramAccess.y;
+
+	}
+	else if (commandState == 1)
+	{
+		vramAccess.xSize = data & 0x0000FFFF;
+		vramAccess.ySize = ((data & 0xFFFF0000) >> 16);
+		uint32_t imagesize = vramAccess.xSize * vramAccess.ySize;
+		imagesize = (imagesize + 1) & 0xFFFFFFFE;
+		this->remainingWords = imagesize / 2;
+	}
+}
+
 uint32_t Gpu::GetGPURead()
 {
+	uint32_t returnValue = 0;
 	if (inCommand && currentCommand == 0xc0)
 	{
-		//TODO: kiolvasni a vramból a kért adatot
+		uint32_t frameBufferPixelId = CalculateFrambufferPixelId();
+
+		uint16_t pixel1 = this->vramPointer[frameBufferPixelId];
+		uint16_t pixel0 = this->vramPointer[frameBufferPixelId + 1]; //TODO: verify order of these two
+		returnValue = ((uint32_t)pixel1) << 16 | pixel0;
+
+		IncrementVramAccessHelpers();
+
 		this->remainingWords--;
 		if (remainingWords == 0)
 		{
@@ -308,15 +333,20 @@ uint32_t Gpu::GetGPURead()
 		}		
 	}
 
-	return uint32_t();
+	return returnValue;
 }
 
 void Gpu::SendGP1Command(uint32_t data)
 {
-	LOG_WARNING << "GP1: %08x " << data;
+	LOG_INFO << "GP1: %08x " << data;
 }
 
 uint32_t Gpu::GetGPUStatus() const
 {
 	return 0x1c000000;
+}
+
+uint16_t * Gpu::getVram()
+{
+	return this->vramPointer;
 }

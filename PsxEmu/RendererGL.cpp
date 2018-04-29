@@ -1,7 +1,6 @@
 #include "RendererGL.h"
 #include <cstdlib>
 #include <string>
-#include <Windows.h>
 #include "Memory.h"
 #include <plog\Log.h>
 
@@ -16,8 +15,8 @@ RendererGL::RendererGL(const Memory* memory)
 {
 	this->memory = memory;
 	glfwInit();
-	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_VERSION_MINOR, 3);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	this->window = glfwCreateWindow(1024, 512, "PSX", nullptr, nullptr);
 	glfwMakeContextCurrent(window);

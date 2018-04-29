@@ -69,7 +69,7 @@ int main()
 {
 #if _DEBUG
 	static plog::ColorConsoleAppender<plog::TxtFormatter> console;
-	plog::init(plog::verbose, &console);
+	plog::init(plog::warning, &console);
 #else
 	static plog::ColorConsoleAppender<plog::TxtFormatter> console;
 	plog::init(plog::error, &console);
