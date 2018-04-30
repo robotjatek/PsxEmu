@@ -83,7 +83,7 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 		this->inCommand = false;
 		this->commandState = 0;
 		vertexId = 0;
-		renderer->PushPolygons(currentPolygon, 4);
+		renderer->PushPolygons(currentPolygon, polyCount);
 	}
 }
 
@@ -111,15 +111,16 @@ void Gpu::MonochromePolygon(const uint8_t polyCount, const uint32_t data)
 	}
 	else
 	{
-		currentPolygon.vertices[commandState].x = data & 0xFFFF;
-		currentPolygon.vertices[commandState].y = data >> 16;
+		currentPolygon.vertices[commandState - 1].x = data & 0xFFFF;
+		currentPolygon.vertices[commandState - 1].y = data >> 16;
 	}
 
 	commandState++;
-	if (this->commandState == 4)
+	if (this->commandState == polyCount + 1)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
+		renderer->PushPolygons(currentPolygon, polyCount);
 	}
 }
 
@@ -319,8 +320,8 @@ uint32_t Gpu::GetGPURead()
 	{
 		uint32_t frameBufferPixelId = CalculateFrambufferPixelId();
 
-		uint16_t pixel1 = this->vramPointer[frameBufferPixelId];
-		uint16_t pixel0 = this->vramPointer[frameBufferPixelId + 1]; //TODO: verify order of these two
+		uint16_t pixel1 = this->vramPointer[frameBufferPixelId + 1];
+		uint16_t pixel0 = this->vramPointer[frameBufferPixelId]; //TODO: verify order of these two
 		returnValue = ((uint32_t)pixel1) << 16 | pixel0;
 
 		IncrementVramAccessHelpers();
