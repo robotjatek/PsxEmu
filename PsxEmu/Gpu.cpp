@@ -28,7 +28,7 @@ void Gpu::GraduatedPolygon(uint8_t polyCount, uint32_t data)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
-		renderer->PushPolygons(currentPolygon, polyCount);
+		renderer->PushPolygons(currentPolygon, polyCount, false);
 	}
 }
 
@@ -72,7 +72,11 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 		}
 		else if (commandState == 4)
 		{
-			currentPolygon.TexturePageIndex = data >> 16;
+			auto texturePageData = data >> 16;
+			currentPolygon.page.tp = static_cast<uint8_t>((texturePageData & 0x180) >> 7);
+			currentPolygon.page.abr = static_cast<uint8_t>((texturePageData & 0x60) >> 5);
+			currentPolygon.page.ty = static_cast<uint8_t>((texturePageData & 0x10) >> 4);
+			currentPolygon.page.tx = static_cast<uint8_t>(texturePageData & 0xF);
 		}
 		vertexId++;
 	}
@@ -83,11 +87,11 @@ void Gpu::TexturedPolygon(uint8_t polyCount, uint32_t data)
 		this->inCommand = false;
 		this->commandState = 0;
 		vertexId = 0;
-		renderer->PushPolygons(currentPolygon, polyCount);
+		renderer->PushPolygons(currentPolygon, polyCount, true);
 	}
 }
 
-Gpu::Gpu(RendererGL* renderer): vram(new uint8_t[VRAM_SIZE])
+Gpu::Gpu(RendererGL* renderer) : vram(new uint8_t[VRAM_SIZE])
 {
 	this->vramPointer = reinterpret_cast<uint16_t*>(vram);
 	this->inCommand = false;
@@ -120,7 +124,7 @@ void Gpu::MonochromePolygon(const uint8_t polyCount, const uint32_t data)
 	{
 		this->inCommand = false;
 		this->commandState = 0;
-		renderer->PushPolygons(currentPolygon, polyCount);
+		renderer->PushPolygons(currentPolygon, polyCount, false);
 	}
 }
 
@@ -165,7 +169,7 @@ uint32_t Gpu::CalculateFrambufferPixelId()
 void Gpu::SendGP0Command(uint32_t data)
 {
 	uint8_t command = (uint8_t)((data & 0xFF000000) >> 24);
-	
+
 	if (!inCommand)
 	{
 		switch (command)
@@ -240,7 +244,7 @@ void Gpu::SendGP0Command(uint32_t data)
 			LOG_WARNING << "Implement GP0(E6h)";
 			break;
 		default:
-			LOG_ERROR <<"NOT IMPLEMENTED GP0 COMMAND!";
+			LOG_ERROR << "NOT IMPLEMENTED GP0 COMMAND!";
 			LOG_ERROR << "GP0: %08x " << data;
 			break;
 		}
@@ -331,7 +335,7 @@ uint32_t Gpu::GetGPURead()
 		{
 			this->inCommand = false;
 			this->commandState = 0;
-		}		
+		}
 	}
 
 	return returnValue;
@@ -347,7 +351,7 @@ uint32_t Gpu::GetGPUStatus() const
 	return 0x1c000000;
 }
 
-uint16_t * Gpu::getVram()
+uint16_t* Gpu::getVram()
 {
 	return this->vramPointer;
 }

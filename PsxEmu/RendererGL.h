@@ -24,7 +24,7 @@ public:
 	virtual ~RendererGL();
 	void SwapBuffers();
 	GLuint LoadShaders();
-	void PushPolygons(const PolygonData& polygon, int numberOfPolygons);
+	void PushPolygons(const PolygonData& polygon, int numberOfPolygons, bool textured);
 	void UpdateDrawingOffset(const GLint offsetX, const GLint offsetY);
 };
 

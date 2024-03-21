@@ -14,18 +14,20 @@ void RendererGL::WindowCloseCallback(GLFWwindow* window)
 RendererGL::RendererGL(const Memory* memory)
 {
 	this->memory = memory;
-	glfwInit();
 	glfwWindowHint(GLFW_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwInit();
+	
 	this->window = glfwCreateWindow(1024, 512, "PSX", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(0);
-	glfwSetWindowCloseCallback(window, this->WindowCloseCallback);
 	
-	glewExperimental = true;
+	glewExperimental = GL_TRUE;
 	glewInit();
 
+	glfwSetWindowCloseCallback(window, this->WindowCloseCallback);
 	glClearColor(0, 0, 0, 0);
 
 	glGenVertexArrays(1, &vertexArrayId);
@@ -150,7 +152,7 @@ GLuint RendererGL::LoadShaders()
 	return programId;
 }
 
-void RendererGL::PushPolygons(const PolygonData& polygon, int numberOfPolygons)
+void RendererGL::PushPolygons(const PolygonData& polygon, int numberOfPolygons, bool textured)
 {
 	if (numberOfPolygons == 3)
 	{
@@ -165,6 +167,7 @@ void RendererGL::PushPolygons(const PolygonData& polygon, int numberOfPolygons)
 	}
 	else if (numberOfPolygons == 4)
 	{
+		// In modern OpenGL a quad is compiled from 2 triangles
 		vertices.push_back(polygon.vertices[0].x);
 		vertices.push_back(polygon.vertices[0].y);
 		colors.push_back(polygon.vertices[0].r);
